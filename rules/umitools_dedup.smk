@@ -2,8 +2,8 @@
 ## High mem usage? Check here! https://umi-tools.readthedocs.io/en/latest/faq.html
 rule umitools_dedupBAM:
     input:
-        CB_WHITELIST = config['CB_WHITELIST'],
-        SORTEDBAM = '{OUTDIR}/{sample}/Aligned.sortedByCoord.out.bam'
+        SORTEDBAM = '{OUTDIR}/{sample}/Aligned.sortedByCoord.out.bam',
+        SORTEDBAMINDEX = '{OUTDIR}/{sample}/Aligned.sortedByCoord.out.bam.bai'
     output:
         DEDUPBAM = '{OUTDIR}/{sample}/Aligned.sortedByCoord.dedup.out.bam',
         TMPBAM = temp('{OUTDIR}/{sample}/tmp.bam')
@@ -15,30 +15,34 @@ rule umitools_dedupBAM:
         #1
     log:
         '{OUTDIR}/{sample}/umitools_dedup/dedup.log'
-    shell:
-        """
-        samtools view -1 -b \
-        -@ {threads} \
-        --tag-file CB:{input.CB_WHITELIST} \
-        {input.SORTEDBAM} \
-        > {output.TMPBAM}
+    run:
+        tmp_chemistry = CHEM_DICT[wildcards.sample]
+        CB_WHITELIST = CHEMISTRY_SHEET["whitelist"][tmp_chemistry]
 
-        samtools index \
-        -@ {threads} \
-        {output.TMPBAM}
+        shell(f"""
+            samtools view -1 -b \
+            -@ {threads} \
+            --tag-file CB:{CB_WHITELIST} \
+            {input.SORTEDBAM} \
+            > {output.TMPBAM}
 
-        umi_tools dedup \
-        -I {output.TMPBAM} \
-        --extract-umi-method=tag \
-        --umi-tag=UB \
-        --cell-tag=CB \
-        --method=unique \
-        --per-cell \
-        --unmapped-reads=discard \
-        --output-stats={params.OUTPUT_PREFIX} \
-        --log {log} \
-        -S {output.DEDUPBAM}
+            samtools index \
+            -@ {threads} \
+            {output.TMPBAM}
+
+            umi_tools dedup \
+            -I {output.TMPBAM} \
+            --extract-umi-method=tag \
+            --umi-tag=UB \
+            --cell-tag=CB \
+            --method=unique \
+            --per-cell \
+            --unmapped-reads=discard \
+            --output-stats={params.OUTPUT_PREFIX} \
+            --log {log} \
+            -S {output.DEDUPBAM}
         """
+        )
         # rm {params.TMPBAM}
         # rm (params.TMPBAM).bai
 

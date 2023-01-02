@@ -3,7 +3,6 @@
 
 rule STARsolo_align:
     input:
-        CB_WHITELIST = config['CB_WHITELIST'],
         FINAL_R1_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R1_final.fq.gz',
         FINAL_R2_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R2_final.fq.gz'
     output:
@@ -19,42 +18,50 @@ rule STARsolo_align:
         SJMAT = '{OUTDIR}/{sample}/STARsolo/Solo.out/SJ/raw/matrix.mtx',
         VELMAT = '{OUTDIR}/{sample}/STARsolo/Solo.out/Velocyto/raw/spliced.mtx'
     params:
-        OUTDIR = config['OUTDIR'],
         STAR_EXEC = config['STAR_EXEC'],
-        STAR_REF = config['STAR_REF'],
-        UMIlen = config['UMIlen'],
         MEMLIMIT = config['MEMLIMIT']
     threads:
         config['CORES']
-    shell: #*NOTE* ``--soloBarcodeReadLength 0` should be removed to ensure read-length checking on BC read (R1) is performed
-        """
-        mkdir -p {params.OUTDIR}/{wildcards.sample}
+    run: 
+        tmp_chemistry = CHEM_DICT[wildcards.sample]
+        STAR_REF = REF_DICT[wildcards.sample]
 
-        {params.STAR_EXEC} \
-        --runThreadN {threads} \
-        --outFileNamePrefix {params.OUTDIR}/{wildcards.sample}/STARsolo/ \
-        --outSAMtype BAM SortedByCoordinate \
-        --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM \
-        --readFilesCommand zcat \
-        --soloUMIlen {params.UMIlen} \
-        --genomeDir {params.STAR_REF} \
-        --genomeLoad LoadAndRemove \
-        --limitBAMsortRAM={params.MEMLIMIT} \
-        --readFilesIn {input.FINAL_R2_FQ} {input.FINAL_R1_FQ} \
-        --clipAdapterType CellRanger4 \
-        --outReadsUnmapped Fastx \
-        --outFilterMismatchNoverLmax 0.05 \
-        --outFilterMatchNmin 12 \
-        --outFilterScoreMinOverLread 0 \
-        --outFilterMatchNminOverLread 0 \
-        --outFilterMultimapNmax 50 \
-        --soloType CB_UMI_Simple \
-        --soloBarcodeReadLength 0 \
-        --soloCBwhitelist {input.CB_WHITELIST} \
-        --soloCellFilter EmptyDrops_CR \
-        --soloFeatures Gene GeneFull SJ Velocyto \
-        --soloMultiMappers EM
-        """
+        UMIlen = CHEMISTRY_SHEET["STAR.UMIlen"][tmp_chemistry]
+        SOLOtype = CHEMISTRY_SHEET["STAR.soloType"][tmp_chemistry]
+        CB_WHITELIST = CHEMISTRY_SHEET["whitelist"][tmp_chemistry]
+
+        #TODO- add whitelist check/gunzip 
+
+        shell(
+            f"""
+            mkdir -p {OUTDIR}/{wildcards.sample}
+
+            {params.STAR_EXEC} \
+            --runThreadN {threads} \
+            --outFileNamePrefix {OUTDIR}/{wildcards.sample}/STARsolo/ \
+            --outSAMtype BAM SortedByCoordinate \
+            --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM \
+            --readFilesCommand zcat \
+            --soloUMIlen {UMIlen} \
+            --genomeDir {STAR_REF} \
+            --genomeLoad LoadAndRemove \
+            --limitBAMsortRAM={params.MEMLIMIT} \
+            --readFilesIn {input.FINAL_R2_FQ} {input.FINAL_R1_FQ} \
+            --clipAdapterType CellRanger4 \
+            --outReadsUnmapped Fastx \
+            --outFilterMultimapNmax 50 \
+            --soloType {SOLOtype} \
+            --soloBarcodeReadLength 0 \
+            --soloCBwhitelist {CB_WHITELIST} \
+            --soloCellFilter EmptyDrops_CR \
+            --soloFeatures Gene GeneFull SJ Velocyto \
+            --soloMultiMappers EM
+            """
+        )
+            # --outFilterMismatchNoverLmax 0.05 \
+            # --outFilterMatchNmin 12 \
+            # --outFilterScoreMinOverLread 0 \
+            # --outFilterMatchNminOverLread 0 \
 
 # compress outputs from STAR (count matrices, cell barcodes, and gene lists)
 rule compress_STAR_outs:
@@ -76,7 +83,6 @@ rule compress_STAR_outs:
         GENEFULLDIR = directory("{OUTDIR}/{sample}/STARsolo/Solo.out/GeneFull")
     threads:
         1
-        # config["CORES_LO"]
     run:
         shell(
             f"""
@@ -94,7 +100,9 @@ rule indexSortedBAM:
         BAI = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.out.bam.bai'
     threads:
         config['CORES']
-    shell:
-        """
-        samtools index -@ {threads} {input.SORTEDBAM}
-        """
+    run:
+        shell(
+            f"""
+            samtools index -@ {threads} {input.SORTEDBAM}
+            """
+        )

@@ -8,11 +8,15 @@ rule bamToSplitBigWig:
         MERGED_BW = '{OUTDIR}/{sample}/Aligned.sortedByCoord.dedup.out_merged.bw'
     params:
         BAM2SPLITBW=config['BAM2SPLITBW'],
-        STAR_REF = config['STAR_REF'],
         OUTPUT_DIR = '{OUTDIR}/{sample}'
     threads:
         config['CORES']
-    shell:
-        """
-        {params.BAM2SPLITBW} {input.BAM} {threads} {params.OUTPUT_DIR} {STAR_REF}/chrNameLength.txt
-        """
+    run:
+        tmp_chemistry = CHEM_DICT[wildcards.sample]
+        STAR_REF = REF_DICT[wildcards.sample]
+
+        shell(
+            f"""
+            {params.BAM2SPLITBW} {input.BAM} {threads} {params.OUTPUT_DIR} {STAR_REF}/chrNameLength.txt
+            """
+        )

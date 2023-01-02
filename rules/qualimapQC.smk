@@ -6,21 +6,24 @@ rule qualimapQC:
         qualimapDir = directory('{OUTDIR}/{sample}/qualimap_out'),
         fastqcReport = '{OUTDIR}/{sample}/qualimap_out/qualimapReport.html'
     params:
-        GENES_GTF = config['GENES_GTF']
+        MEM = "24G"
     threads:
         config['CORES']
-    shell:
-        """
-        mkdir -p {output.qualimapDir}
-        cd {output.qualimapDir}
+    run:
+        GENES_GTF = GTF_DICT[wildcards.sample]
+        shell(
+            f"""
+            mkdir -p {output.qualimapDir}
+            cd {output.qualimapDir}
 
-        qualimap rnaseq \
-        -bam {input.SORTEDBAM} \
-        -gtf {params.GENES_GTF} \
-        --sequencing-protocol strand-specific-forward \
-        --sorted \
-        --java-mem-size=8G \
-        -outdir {output.qualimapDir} \
-        -outformat html
-        """
+            qualimap rnaseq \
+            -bam {input.SORTEDBAM} \
+            -gtf {GENES_GTF} \
+            --sequencing-protocol strand-specific-forward \
+            --sorted \
+            --java-mem-size={params.MEM} \
+            -outdir {output.qualimapDir} \
+            -outformat html
+            """
+        )
         # -nt {threads} \

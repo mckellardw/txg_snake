@@ -1,6 +1,6 @@
 ########################################################################################################
-# 10x_STARsolo
-#   Snakemake workflow to use STARsolo to align and quantify 10x Chromium datasets
+# txg_snake
+#   Snakemake workflow to align and quantify 10x Chromium/Visium/etc-ium datasets
 #   v1.0
 #   Written by David McKellar
 ########################################################################################################
@@ -32,22 +32,35 @@ SAMPLES = [i for i in list(SAMPLE_SHEET['sampleID']) if i] #grab non-empty entri
 R1_FQS = dict(zip(SAMPLES, list(SAMPLE_SHEET['fastq_R1'])))
 R2_FQS = dict(zip(SAMPLES, list(SAMPLE_SHEET['fastq_R2'])))
 
-STAR_REF = config['STAR_REF']
-
-
-print(SAMPLES)
 ########################################################################################################
 # Executables
 ########################################################################################################
 STAR_EXEC = config['STAR_EXEC']
+KB_EXEC = config['KB_EXEC']
+KALLISTO_EXEC = config['KALLISTO_EXEC']
+BUST_EXEC = config['BUST_EXEC']
+FASTQC_EXEC = config["FASTQC_EXEC"]
+CUTADAPT_EXEC = config["CUTADAPT_EXEC"]
+SAMTOOLS_EXEC = config["SAMTOOLS_EXEC"]
+UMITOOLS_EXEC = config["UMITOOLS_EXEC"]
+QUALIMAP_EXEC = config["QUALIMAP_EXEC"]
+# MULTIQC_EXEC = config["MULTIQC_EXEC"]
+BAM2SPLITBW = config["BAM2SPLITBW"]
+FASTX_COLLAPSER = config["FASTX_COLLAPSER"]
+BLASTDB = config["BLASTDB"]
+PICARD_EXEC = config["PICARD_EXEC"]
 
 ########################################################################################################
 # Pre-run setup
 ########################################################################################################
-#TODO
-# CHEM_DICT = {}
-# for i in range(0,SAMPLE_SHEET.shape[0]):
-#     CHEM_DICT[tmp_gsm] = list(SAMPLE_SHEET["chemistry"])[i]
+CHEM_DICT = {}
+REF_DICT = {}
+GTF_DICT = {}
+for i in range(0,SAMPLE_SHEET.shape[0]):
+    tmp_id = list(SAMPLE_SHEET["sampleID"])[i]
+    CHEM_DICT[tmp_id] = list(SAMPLE_SHEET["chemistry"])[i]
+    REF_DICT[tmp_id] = list(SAMPLE_SHEET["chemistry"])[i]
+    GTF_DICT[tmp_id] = list(SAMPLE_SHEET["genes_gtf"])[i]
 
 ########################################################################################################
 rule all:
@@ -59,7 +72,7 @@ rule all:
         # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_merged.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES), #
         expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.out.bam.bai', OUTDIR=config['OUTDIR'], sample=SAMPLES), #non-deduplicated .bam; used for saturation estimation
         # expand('{OUTDIR}/{sample}/kb_wrapper/counts_unfiltered/adata.h5ad', OUTDIR=config['OUTDIR'], sample=SAMPLES),
-        expand('{OUTDIR}/{sample}/kb/counts_unfiltered/output.mtx', OUTDIR=config['OUTDIR'], sample=SAMPLES),
+        # expand('{OUTDIR}/{sample}/kb/counts_unfiltered/output.mtx', OUTDIR=config['OUTDIR'], sample=SAMPLES),
         expand('{OUTDIR}/{sample}/preTrim_fastqc_R2_out', OUTDIR=config['OUTDIR'], sample=SAMPLES), # raw R2 fastQC results
         expand('{OUTDIR}/{sample}/postTrim_fastqc_R2_out', OUTDIR=config['OUTDIR'], sample=SAMPLES), # adapter/polyA/ployG-trimmed R2 fastQC results
         expand('{OUTDIR}/{sample}/cutadapt.log', OUTDIR=config['OUTDIR'], sample=SAMPLES),
@@ -68,20 +81,6 @@ rule all:
         # expand('{OUTDIR}/{sample}/mirbase/Solo.out/Gene/raw/matrix.mtx', OUTDIR=config['OUTDIR'], sample=SAMPLES), # mirbase count mat
         expand('{OUTDIR}/{sample}/Unmapped_fastqc_out', OUTDIR=config['OUTDIR'], sample=SAMPLES), #fastQC results for unmapped reads
         expand('{OUTDIR}/{sample}/Unmapped.out.mate2_blastResults.txt', OUTDIR=config['OUTDIR'], sample=SAMPLES), # blastn results for unmapped R1 reads non-strand-split bigWigs (for
-
-#############################################
-## Pre-alignment set up
-#############################################
-# Unzip the whitelist file if it hasn't been done yet
-rule gunzipWhitelist:
-    input:
-        config['CB_WHITELIST']+'.gz'
-    output:
-        config['CB_WHITELIST']
-    shell:
-        """
-        gunzip {input}
-        """
 
 
 # Aggregating and QCing raw read data
@@ -107,7 +106,7 @@ include: "rules/bamToSplitBigWig.smk"
 
 
 # convert .mtx format to .h5
-# SHout out Alex Wolf- https://falexwolf.me/2017/sparse-matrices-with-h5py/
+# Shout out Alex Wolf- https://falexwolf.me/2017/sparse-matrices-with-h5py/
 rule STAR_mtx2h5:
     input:
         # VELMAT = "{OUTDIR}/{sample}/STARsolo/Solo.out/Velocyto/raw/spliced.mtx.gz",
