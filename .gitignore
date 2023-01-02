@@ -1,0 +1,16 @@
+# Snakemake garbage
+.snakemake/*
+
+# VScode garbage
+.vscode/*
+
+# Big data files
+**.fastq
+**.fq
+**.fastq.gz
+**.fq.gz
+**.bw
+**.bam
+
+# Misc.
+.~lock.*
