@@ -1,4 +1,4 @@
-# 10x_STARsolo
+# txg_snake
 Preprocessing, alignment, QC, and quantification workflow for 10x Genomics data (Chromium & Visium)
 **David W. McKellar**
 
@@ -8,11 +8,14 @@ Preprocessing, alignment, QC, and quantification workflow for 10x Genomics data 
 - Info on sample_sheet format
 
 Dependencies & Sources:
-- `cutadapt` [v##]()
-- `fastqc` [v##]()
-- `STAR` [v2.9.#]()
-- `qualimap` [v##]()
-- `vsearch` [v#](https://github.com/torognes/vsearch)
+- `cutadapt` [v4.1]()
+- `fastqc` [v0.11.8]()
+- `STAR` [v2.7.10a]()
+- `kallisto` [v1.0.7]()
+- `bustools` [v0.1.0.dev2]()
+- `umi-tools` [v1.1.2]()
+- `qualimap` [v2.2.a]()
+- `vsearch` [v2.17.0](https://github.com/torognes/vsearch)
 - `BLAST`
 
-Outputs:
+Tree of Outputs:
