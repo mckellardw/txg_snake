@@ -59,7 +59,7 @@ GTF_DICT = {}
 for i in range(0,SAMPLE_SHEET.shape[0]):
     tmp_id = list(SAMPLE_SHEET["sampleID"])[i]
     CHEM_DICT[tmp_id] = list(SAMPLE_SHEET["chemistry"])[i]
-    REF_DICT[tmp_id] = list(SAMPLE_SHEET["chemistry"])[i]
+    REF_DICT[tmp_id] = list(SAMPLE_SHEET["STAR_ref"])[i]
     GTF_DICT[tmp_id] = list(SAMPLE_SHEET["genes_gtf"])[i]
 
 ########################################################################################################

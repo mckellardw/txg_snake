@@ -36,7 +36,7 @@ FASTQC_ADAPTERS: resources/fastqc_adapters.txt
 # OUTDIR: /workdir/dwm269/butcher_kd/data/STARsolo/Sus_scrofa_EGFP
 
 TMPDIR: /workdir/dwm269/flc_sethupathy/tmp
-OUTDIR: /workdir/dwm269/flc_sethupathy/data/align_out/
+OUTDIR: /workdir/dwm269/flc_sethupathy/data/align_out
 
 ########################################################################################################
 # Executables - file paths
