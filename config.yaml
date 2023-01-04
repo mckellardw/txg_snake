@@ -47,7 +47,7 @@ KALLISTO_EXEC: kallisto
 BUST_EXEC: bustools
 CUTADAPT_EXEC: cutadapt
 FASTQC_EXEC: fastqc
-SAMTOOLS_EXEC: samtools
+SAMTOOLS_EXEC: /programs/samtools-1.15.1-r/bin/samtools
 UMITOOLS_EXEC: umi_tools
 QUALIMAP_EXEC: qualimap
 BAM2SPLITBW: /home/dwm269/DWM_utils/seq_utils/bam2splitBigWig.sh #Custom function in DWM_utils that splits a bam file by strand and converts it into bigwig format

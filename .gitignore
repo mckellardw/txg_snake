@@ -11,6 +11,8 @@
 **.fq.gz
 **.bw
 **.bam
+**.fa
+**.fa.gz
 
 # Misc.
 .~lock.*
