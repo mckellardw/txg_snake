@@ -5,4 +5,6 @@
 "3p_v3.1","resources/whitelists/3M-february-2018.txt",12,"CB_UMI_Simple","#TODO"
 "5p_v1","resources/whitelists/737K-august-2016.txt","#TODO","#TODO","#TODO"
 "5p_v2","resources/whitelists/737K-august-2016.txt","#TODO","#TODO","#TODO"
-"visium","resources/whitelists/visium-v1.txt",12,"CB_UMI_Simple","#TODO"
+"visium_v1","resources/whitelists/visium-v1.txt",12,"CB_UMI_Simple","#TODO"
+"visium_v2","resources/whitelists/visium-v2.txt",12,"CB_UMI_Simple","#TODO"
+"visium_shortR1","resources/whitelists/visium-v1.txt",10,"CB_UMI_Simple","#TODO"

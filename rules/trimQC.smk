@@ -14,11 +14,33 @@ rule preTrim_FastQC_R2:
         """
         mkdir -p {output.fastqcDir}
 
-        fastqc \
+        {FASTQC_EXEC}  \
         --outdir {output.fastqcDir} \
         --threads {threads} \
         -a {params.adapters} \
         {input.MERGED_R2_FQ}
+        """
+
+rule preTrim_FastQC_R1:
+    input:
+        MERGED_R1_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R1.fq.gz'
+    output:
+        fastqcDir = directory('{OUTDIR}/{sample}/preTrim_fastqc_R1_out'),
+        # fastqcReport = ''
+    params:
+        adapters = config['FASTQC_ADAPTERS']
+    threads:
+        config['CORES']
+        # min([config['CORES'],8]) # 8 core max based on recommendations from trim_galore authors
+    shell:
+        """
+        mkdir -p {output.fastqcDir}
+
+        {FASTQC_EXEC} \
+        --outdir {output.fastqcDir} \
+        --threads {threads} \
+        -a {params.adapters} \
+        {input.MERGED_R1_FQ}
         """
 
 # TSO, polyA, and polyG trimming
@@ -70,7 +92,7 @@ rule postTrim_FastQC_R2:
         """
         mkdir -p {output.fastqcDir}
 
-        fastqc \
+        {FASTQC_EXEC} \
         --outdir {output.fastqcDir} \
         --threads {threads} \
         -a {params.adapters} \
