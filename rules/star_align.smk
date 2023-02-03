@@ -29,6 +29,7 @@ rule STARsolo_align:
         UMIlen = CHEMISTRY_SHEET["STAR.UMIlen"][tmp_chemistry]
         SOLOtype = CHEMISTRY_SHEET["STAR.soloType"][tmp_chemistry]
         CB_WHITELIST = CHEMISTRY_SHEET["whitelist"][tmp_chemistry]
+        extraSTAR = CHEMISTRY_SHEET["STAR.extra"][tmp_chemistry]
 
         #TODO- add whitelist check/gunzip 
 
@@ -49,8 +50,7 @@ rule STARsolo_align:
             --readFilesIn {input.FINAL_R2_FQ} {input.FINAL_R1_FQ} \
             --clipAdapterType CellRanger4 \
             --outReadsUnmapped Fastx \
-            --outFilterMultimapNmax 50 \
-            --soloType {SOLOtype} \
+            --soloType {SOLOtype}  {extraSTAR} \
             --soloBarcodeReadLength 0 \
             --soloCBwhitelist {CB_WHITELIST} \
             --soloCellFilter EmptyDrops_CR \
@@ -58,6 +58,7 @@ rule STARsolo_align:
             --soloMultiMappers EM
             """
         )
+            #STRS parameters:
             # --outFilterMismatchNoverLmax 0.05 \
             # --outFilterMatchNmin 12 \
             # --outFilterScoreMinOverLread 0 \
