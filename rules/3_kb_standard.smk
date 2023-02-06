@@ -58,7 +58,6 @@ rule kb_wrapper:
         # gzip -qf {params.OUTDIR}/{wildcards.sample}/kb/counts_unfiltered/*.mtx
 
 # kallisto/bustools workflow (fastq to bus/txt)
-#TODO- make chemistry passable
 rule kallisto_bus_standard:
     input:
         FINAL_R1_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R1_final.fq.gz',
@@ -68,7 +67,7 @@ rule kallisto_bus_standard:
         TRANSCRIPTS = '{OUTDIR}/{sample}/kb/transcripts.txt',
         ECMAP = '{OUTDIR}/{sample}/kb/matrix.ec'
     params:
-        OUTDIR = config['OUTDIR'],
+        # OUTDIR = config['OUTDIR'],
         # KALLISTO_EXEC = config['KALLISTO_EXEC'],
         # KB_IDX = config['KB_IDX'],
         MEMLIMIT = config['MEMLIMIT']
@@ -76,19 +75,18 @@ rule kallisto_bus_standard:
         '{OUTDIR}/{sample}/kb/kallisto_bus_standard.log'
     threads:
         config['CORES']
-    run:
-        tmp_chemistry = CHEM_DICT[wildcards.sample] #TODO
-        STAR_REF = REF_DICT[wildcards.sample]
+    run:        
+        tmp_chemistry = CHEM_DICT[wildcards.sample]
+        KB_IDX = IDX_DICT[wildcards.sample]
 
-        UMIlen = CHEMISTRY_SHEET["STAR.UMIlen"][tmp_chemistry]
-        SOLOtype = CHEMISTRY_SHEET["STAR.soloType"][tmp_chemistry]
         CB_WHITELIST = CHEMISTRY_SHEET["whitelist"][tmp_chemistry]
+        KB_X = CHEMISTRY_SHEET["kb.x"][tmp_chemistry]
 
         shell(f"""
-            bash scripts/kb.sh {params.OUTDIR}/{wildcards.sample}/kb \
+            bash scripts/kb.sh {OUTDIR}/{wildcards.sample}/kb \
             {KB_IDX} \
-            {input.CB_WHITELIST} \
-            {params.CHEMISTRY} \
+            {CB_WHITELIST} \
+            {KB_X} \
             {log} \
             {threads} \
             {params.MEMLIMIT} \
@@ -96,6 +94,7 @@ rule kallisto_bus_standard:
             """
         )
 
+# Convert bus file into readable matrix format
 #TODO- multimapping or EM?
 rule bus2mat_standard:
     input:
@@ -106,25 +105,28 @@ rule bus2mat_standard:
         MAT = '{OUTDIR}/{sample}/kb/counts_unfiltered/output.mtx'
         # EC = '{OUTDIR}/{sample}/kb/counts_unfiltered/output.ec.txt'
     params:
-        MATDIR = directory('{OUTDIR}/{sample}/kb/counts_unfiltered'),
-        OUTDIR = config['OUTDIR'],
-        # KB_T2G = config['KB_T2G']
+        MATDIR = directory('{OUTDIR}/{sample}/kb/counts_unfiltered')
+        # OUTDIR = config['OUTDIR']
     threads:
         1
-    shell:
-        """
-        mkdir -p {params.MATDIR}
+    run:      
+        tmp_chemistry = CHEM_DICT[wildcards.sample]
+        KB_T2G = T2G_DICT[wildcards.sample]
 
-        {BUST_EXEC} count \
-        --output {params.MATDIR}/ \
-        --genemap {params.KB_T2G} \
-        --ecmap {input.ECMAP} \
-        --txnames {input.TRANSCRIPTS} \
-        --genecounts \
-        --umi-gene \
-        --em \
-        {input.BUS}
-        """
+        shell(f"""
+            mkdir -p {params.MATDIR}
+
+            {BUST_EXEC} count \
+            --output {params.MATDIR}/ \
+            --genemap {KB_T2G} \
+            --ecmap {input.ECMAP} \
+            --txnames {input.TRANSCRIPTS} \
+            --genecounts \
+            --umi-gene \
+            --em \
+            {input.BUS}
+            """
+        )
 
         # --multimapping \
         # """
@@ -135,3 +137,6 @@ rule bus2mat_standard:
         # {params.KB_T2G} \
         # {input.BUSTEXT}
         # """
+
+
+# TODO- compress outputs!

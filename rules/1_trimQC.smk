@@ -61,7 +61,7 @@ rule cutadapt_R2:
     threads:
         config["CORES"]
     log:
-        "{OUTDIR}/{sample}/cutadapt.log"
+        "{OUTDIR}/{sample}/log.cutadapt.json"
     shell:
         """
         {params.CUTADAPT_EXEC} \
@@ -74,7 +74,8 @@ rule cutadapt_R2:
  		-o {output.FINAL_R1_FQ} \
         -p {output.FINAL_R2_FQ} \
         --cores {threads} \
-        {input.MERGED_R1_FQ} {input.MERGED_R2_FQ} 1> {log}
+        --json={log} \
+        {input.MERGED_R1_FQ} {input.MERGED_R2_FQ}
         """
 
 rule postTrim_FastQC_R2:

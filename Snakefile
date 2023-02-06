@@ -53,14 +53,19 @@ PICARD_EXEC = config["PICARD_EXEC"]
 ########################################################################################################
 # Pre-run setup
 ########################################################################################################
-CHEM_DICT = {}
-REF_DICT = {}
-GTF_DICT = {}
+# Build dictionaries of chemistries & species to use for alignment
+CHEM_DICT = {} # Dictionary of chemistry recipe to use for each sample
+REF_DICT = {} # Dictionary of reference genomes to use
+GTF_DICT = {} # Dictionary of gene annotations (.gtf format)
+IDX_DICT = {} # Dictionary of kallisto indices
+T2G_DICT = {} # Dictionary of kallisto transcript-to-gene maps
 for i in range(0,SAMPLE_SHEET.shape[0]):
     tmp_id = list(SAMPLE_SHEET["sampleID"])[i]
     CHEM_DICT[tmp_id] = list(SAMPLE_SHEET["chemistry"])[i]
     REF_DICT[tmp_id] = list(SAMPLE_SHEET["STAR_ref"])[i]
     GTF_DICT[tmp_id] = list(SAMPLE_SHEET["genes_gtf"])[i]
+    IDX_DICT[tmp_id] = list(SAMPLE_SHEET["kb_idx"])[i]
+    T2G_DICT[tmp_id] = list(SAMPLE_SHEET["kb_t2g"])[i]
 
 ########################################################################################################
 rule all:
@@ -70,7 +75,7 @@ rule all:
         # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_plus.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES), # strand-split bigWigs
         # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_merged.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES), 
         # expand('{OUTDIR}/{sample}/kb_wrapper/counts_unfiltered/adata.h5ad', OUTDIR=config['OUTDIR'], sample=SAMPLES),
-        # expand('{OUTDIR}/{sample}/kb/counts_unfiltered/output.mtx', OUTDIR=config['OUTDIR'], sample=SAMPLES),
+        expand('{OUTDIR}/{sample}/kb/counts_unfiltered/output.mtx', OUTDIR=config['OUTDIR'], sample=SAMPLES),
         expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.out.bam.bai', OUTDIR=config['OUTDIR'], sample=SAMPLES), #non-deduplicated .bam; used for saturation estimation
         expand('{OUTDIR}/{sample}/qualimap_out/qualimapReport.html', OUTDIR=config['OUTDIR'], sample=SAMPLES), # alignment QC qith qualimap 
         expand('{OUTDIR}/{sample}/STARsolo/Solo.out/Gene/raw/matrix.mtx.gz', OUTDIR=config['OUTDIR'], sample=SAMPLES),
@@ -83,18 +88,18 @@ rule all:
 
 
 # Aggregating and QCing raw read data
-include: "rules/merge_fqs.smk"
-include: "rules/trimQC.smk"
+include: "rules/1_merge_fqs.smk"
+include: "rules/1_trimQC.smk"
 
 # Alignment, post-alignment clean-up, and QC with STARsolo
 # include: "rules/build_ref.smk"
-include: "rules/star_align.smk"
-include: "rules/umitools_dedup.smk"
-include: "rules/star_unmapped.smk"
-include: "rules/qualimapQC.smk"
+include: "rules/2_star_align.smk"
+include: "rules/2_umitools_dedup.smk"
+include: "rules/2_star_unmapped.smk"
+include: "rules/2_qualimapQC.smk"
 
 # kallisto
-include: "rules/kb_standard.smk"
-# include: "rules/kallisto_quant.smk"
+include: "rules/3_kb_standard.smk"
+# include: "rules/3_kallisto_quant.smk"
 
 include: "rules/bamToSplitBigWig.smk"
