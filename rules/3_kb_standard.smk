@@ -139,4 +139,21 @@ rule bus2mat_standard:
         # """
 
 
-# TODO- compress outputs!
+# gzip the count matrix, etc.
+rule compress_kb_outs:
+    input:
+        BCS = '{OUTDIR}/{sample}/kb/counts_unfiltered/output.barcodes.txt',
+        GENES = '{OUTDIR}/{sample}/kb/counts_unfiltered/output.genes.txt',
+        MAT = '{OUTDIR}/{sample}/kb/counts_unfiltered/output.mtx'
+    output:
+        BCS = '{OUTDIR}/{sample}/kb/counts_unfiltered/output.barcodes.txt.gz',
+        GENES = '{OUTDIR}/{sample}/kb/counts_unfiltered/output.genes.txt.gz',
+        MAT = '{OUTDIR}/{sample}/kb/counts_unfiltered/output.mtx.gz'
+    params:
+        MATDIR = directory('{OUTDIR}/{sample}/kb/counts_unfiltered')
+    threads:
+        config['CORES']        
+    shell:
+        """
+        pigz -p{threads} {input.BCS} {input.GENES} {input.MAT}
+        """

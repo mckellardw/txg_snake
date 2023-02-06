@@ -87,10 +87,10 @@ rule compress_STAR_outs:
     run:
         shell(
             f"""
-            gzip -qf {params.VELDIR}/*/*.tsv {params.VELDIR}/*/*.mtx
-            gzip -qf {params.GENEDIR}/*/*.tsv {params.GENEDIR}/*/*.mtx
-            gzip -qf {params.GENEFULLDIR}/*/*.tsv {params.GENEFULLDIR}/*/*.mtx
-            gzip -qf {params.SJDIR}/*/*.tsv {params.SJDIR}/*/*.mtx
+            pigz -p{threads} {params.VELDIR}/*/*.tsv {params.VELDIR}/*/*.mtx \
+             {params.GENEDIR}/*/*.tsv {params.GENEDIR}/*/*.mtx \
+             {params.GENEFULLDIR}/*/*.tsv {params.GENEFULLDIR}/*/*.mtx \
+             {params.SJDIR}/*/*.tsv {params.SJDIR}/*/*.mtx
             """
         )
 
