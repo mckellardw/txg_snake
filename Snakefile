@@ -60,9 +60,11 @@ REF_DICT = {} # Dictionary of reference genomes to use
 GTF_DICT = {} # Dictionary of gene annotations (.gtf format)
 IDX_DICT = {} # Dictionary of kallisto indices
 T2G_DICT = {} # Dictionary of kallisto transcript-to-gene maps
+rRNA_DICT = {}
 for i in range(0,SAMPLE_SHEET.shape[0]):
     tmp_id = list(SAMPLE_SHEET["sampleID"])[i]
     CHEM_DICT[tmp_id] = list(SAMPLE_SHEET["chemistry"])[i]
+    rRNA_DICT[tmp_id] = list(SAMPLE_SHEET["STAR_rRNA_ref"])[i]
     REF_DICT[tmp_id] = list(SAMPLE_SHEET["STAR_ref"])[i]
     GTF_DICT[tmp_id] = list(SAMPLE_SHEET["genes_gtf"])[i]
     IDX_DICT[tmp_id] = list(SAMPLE_SHEET["kb_idx"])[i]
@@ -76,28 +78,30 @@ rule all:
         # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_plus.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES), # strand-split bigWigs
         # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_merged.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES), 
         # expand('{OUTDIR}/{sample}/kb_wrapper/counts_unfiltered/adata.h5ad', OUTDIR=config['OUTDIR'], sample=SAMPLES),
-        expand('{OUTDIR}/{sample}/kb/counts_unfiltered/output.mtx.gz', OUTDIR=config['OUTDIR'], sample=SAMPLES),
+        # expand('{OUTDIR}/{sample}/kb/counts_unfiltered/output.mtx.gz', OUTDIR=config['OUTDIR'], sample=SAMPLES),
+        expand('{OUTDIR}/{sample}/STARsolo_rRNA/Solo.out/GeneFull/raw/matrix.mtx.gz', OUTDIR=config['OUTDIR'], sample=SAMPLES),
         expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.out.bam.bai', OUTDIR=config['OUTDIR'], sample=SAMPLES), #non-deduplicated .bam; used for saturation estimation
-        expand('{OUTDIR}/{sample}/qualimap_out/qualimapReport.html', OUTDIR=config['OUTDIR'], sample=SAMPLES), # alignment QC qith qualimap 
         expand('{OUTDIR}/{sample}/STARsolo/Solo.out/Gene/raw/matrix.mtx.gz', OUTDIR=config['OUTDIR'], sample=SAMPLES),
+        expand('{OUTDIR}/{sample}/qualimap_out/qualimapReport.html', OUTDIR=config['OUTDIR'], sample=SAMPLES), # alignment QC qith qualimap 
         expand('{OUTDIR}/{sample}/Unmapped_fastqc_out', OUTDIR=config['OUTDIR'], sample=SAMPLES), #fastQC results for unmapped reads
-        expand('{OUTDIR}/{sample}/Unmapped.out.mate2_blastResults.txt', OUTDIR=config['OUTDIR'], sample=SAMPLES), # blastn results for unmapped R1 reads non-strand-split bigWigs (for
+        # expand('{OUTDIR}/{sample}/Unmapped.out.mate2_blastResults.txt', OUTDIR=config['OUTDIR'], sample=SAMPLES), # blastn results for unmapped R1 reads non-strand-split bigWigs (for
         expand('{OUTDIR}/{sample}/preTrim_fastqc_R1_out', OUTDIR=config['OUTDIR'], sample=SAMPLES), # raw R1 fastQC results
         expand('{OUTDIR}/{sample}/preTrim_fastqc_R2_out', OUTDIR=config['OUTDIR'], sample=SAMPLES), # raw R2 fastQC results
         expand('{OUTDIR}/{sample}/postTrim_fastqc_R2_out', OUTDIR=config['OUTDIR'], sample=SAMPLES), # adapter/polyA/ployG-trimmed R2 fastQC results
-        expand('{OUTDIR}/{sample}/cutadapt.log', OUTDIR=config['OUTDIR'], sample=SAMPLES)
+        expand('{OUTDIR}/{sample}/log.cutadapt.json', OUTDIR=config['OUTDIR'], sample=SAMPLES)
 
 
 # Aggregating and QCing raw read data
-include: "rules/1_merge_fqs.smk"
-include: "rules/1_trimQC.smk"
+include: "rules/1a_merge_fqs.smk"
+include: "rules/1b_trimQC.smk"
 
 # Alignment, post-alignment clean-up, and QC with STARsolo
 # include: "rules/build_ref.smk"
-include: "rules/2_star_align.smk"
-include: "rules/2_umitools_dedup.smk"
-include: "rules/2_star_unmapped.smk"
-include: "rules/2_qualimapQC.smk"
+include: "rules/2a_star_align_rRNA.smk"
+include: "rules/2b_star_align.smk"
+include: "rules/2c_star_unmapped.smk"
+include: "rules/2d_umitools_dedup.smk"
+include: "rules/2e_qualimapQC.smk"
 
 # kallisto
 include: "rules/3_kallisto_align.smk"
