@@ -18,7 +18,7 @@ rule STARsolo_align_rRNA:
         config['CORES']
     run: 
         tmp_chemistry = CHEM_DICT[wildcards.sample]
-        STAR_rRNA_REF = rRNA_DICT[wildcards.sample]
+        STAR_REF = rRNA_DICT[wildcards.sample] # use rRNA ref
 
         UMIlen = CHEMISTRY_SHEET["STAR.UMIlen"][tmp_chemistry]
         SOLOtype = CHEMISTRY_SHEET["STAR.soloType"][tmp_chemistry]
