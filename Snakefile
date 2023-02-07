@@ -14,6 +14,7 @@ import scipy.sparse
 ########################################################################################################
 configfile:'config.yaml'
 CHEMISTRY_SHEET = pd.read_csv(config["CHEMISTRY_SHEET"], na_filter=False,index_col=0) #"resources/chemistry_sheet.csv"
+
 ########################################################################################################
 # Directories and locations
 ########################################################################################################
@@ -99,7 +100,7 @@ include: "rules/2_star_unmapped.smk"
 include: "rules/2_qualimapQC.smk"
 
 # kallisto
-include: "rules/3_kb_standard.smk"
+include: "rules/3_kallisto_align.smk"
 # include: "rules/3_kallisto_quant.smk"
 
 include: "rules/bamToSplitBigWig.smk"
