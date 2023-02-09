@@ -24,6 +24,16 @@ Preprocessing, alignment, QC, and quantification workflow for 10x Genomics data 
 |sample1       | /path/to/sample1_L001_R1.fastq.gz /path/to/sample1_L002_R1.fastq.gz   | /path/to/sample1_L001_R2.fastq.gz /path/to/sample1_L002_R2.fastq.gz  | Visium    | /path/to/STAR_reference_rRNA | /path/to/STAR_reference  |/path/to/annotations.gtf | /path/to/kallisto/transcriptome.idx | /path/to/kallisto/transcripts_to_genes.txt |
 |sample2      | /path/to/sample2_L001_R1.fastq.gz /path/to/sample2_L002_R1.fastq.gz   | /path/to/sample2_L001_R2.fastq.gz /path/to/sample2_L002_R2.fastq.gz  | STRS    | /path/to/STAR_reference_rRNA | /path/to/STAR_reference  |/path/to/annotations.gtf | /path/to/kallisto/transcriptome.idx | /path/to/kallisto/transcripts_to_genes.txt |
 
+## Generating references:
+#### rRNA STAR reference for in silico rRNA depletion/quantification
+```
+#TODO
+```
+#### Genomic STAR reference
+```
+#TODO
+```
+
 ## Tree of Outputs:
 ```
 {SAMPLE_ID}/

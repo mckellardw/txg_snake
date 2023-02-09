@@ -83,16 +83,17 @@ rule compress_STAR_outs:
         GENEDIR = directory("{OUTDIR}/{sample}/STARsolo/Solo.out/Gene"),
         GENEFULLDIR = directory("{OUTDIR}/{sample}/STARsolo/Solo.out/GeneFull")
     threads:
-        1
+        config['CORES']        
     run:
         shell(
             f"""
-            pigz -p{threads} {params.VELDIR}/*/*.tsv {params.VELDIR}/*/*.mtx \
-             {params.GENEDIR}/*/*.tsv {params.GENEDIR}/*/*.mtx \
-             {params.GENEFULLDIR}/*/*.tsv {params.GENEFULLDIR}/*/*.mtx \
-             {params.SJDIR}/*/*.tsv {params.SJDIR}/*/*.mtx
+            pigz -p{threads} {OUTDIR}/{wildcards.sample}/STARsolo/*/*/*.tsv {OUTDIR}/{wildcards.sample}/STARsolo/*/*/*.mtx
             """
         )
+# {params.VELDIR}/*/*.tsv {params.VELDIR}/*/*.mtx \
+#              {params.GENEDIR}/*/*.tsv {params.GENEDIR}/*/*.mtx \
+#              {params.GENEFULLDIR}/*/*.tsv {params.GENEFULLDIR}/*/*.mtx \
+#              {params.SJDIR}/*/*.tsv {params.SJDIR}/*/*.mtx
 
 rule indexSortedBAM:
     input:

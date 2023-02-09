@@ -9,3 +9,4 @@
 "visium_v2","resources/whitelists/visium-v2.txt",12,"CB_UMI_Simple","--outFilterMultimapNmax 50","VISIUM"
 "visium_shortR1","resources/whitelists/visium-v1.txt",10,"CB_UMI_Simple","--outFilterMultimapNmax 50","VISIUM"
 "STRS","resources/whitelists/visium-v1.txt",12,"CB_UMI_Simple","--outFilterMultimapNmax 50 --outFilterMismatchNoverLmax 0.05  --outFilterMatchNmin 12  --outFilterScoreMinOverLread 0  --outFilterMatchNminOverLread 0 ","VISIUM"
+"STRS_v2","resources/whitelists/visium-v2.txt",12,"CB_UMI_Simple","--outFilterMultimapNmax 50 --outFilterMismatchNoverLmax 0.05  --outFilterMatchNmin 12  --outFilterScoreMinOverLread 0  --outFilterMatchNminOverLread 0 ","VISIUM"
