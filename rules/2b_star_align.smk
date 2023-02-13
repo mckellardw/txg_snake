@@ -3,8 +3,8 @@
 
 rule STARsolo_align:
     input:
-        FINAL_R1_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R1_final.fq.gz',
-        FINAL_R2_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R2_final.fq.gz'
+        R1_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R1_final_filtered.fq.gz',
+        R2_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R2_final_filtered.fq.gz',
     output:
         SORTEDBAM = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.out.bam', #TODO: add temp()
         UNMAPPED1 = '{OUTDIR}/{sample}/STARsolo/Unmapped.out.mate1',
@@ -47,7 +47,7 @@ rule STARsolo_align:
             --genomeDir {STAR_REF} \
             --genomeLoad LoadAndRemove \
             --limitBAMsortRAM={params.MEMLIMIT} \
-            --readFilesIn {input.FINAL_R2_FQ} {input.FINAL_R1_FQ} \
+            --readFilesIn {input.R2_FQ} {input.R1_FQ} \
             --clipAdapterType CellRanger4 \
             --outReadsUnmapped Fastx \
             --soloType {SOLOtype}  {extraSTAR} \
@@ -83,16 +83,17 @@ rule compress_STAR_outs:
         GENEDIR = directory("{OUTDIR}/{sample}/STARsolo/Solo.out/Gene"),
         GENEFULLDIR = directory("{OUTDIR}/{sample}/STARsolo/Solo.out/GeneFull")
     threads:
-        1
+        config['CORES']        
     run:
         shell(
             f"""
-            pigz -p{threads} {params.VELDIR}/*/*.tsv {params.VELDIR}/*/*.mtx \
-             {params.GENEDIR}/*/*.tsv {params.GENEDIR}/*/*.mtx \
-             {params.GENEFULLDIR}/*/*.tsv {params.GENEFULLDIR}/*/*.mtx \
-             {params.SJDIR}/*/*.tsv {params.SJDIR}/*/*.mtx
+            pigz -p{threads} {OUTDIR}/{wildcards.sample}/STARsolo/*/*/*.tsv {OUTDIR}/{wildcards.sample}/STARsolo/*/*/*.mtx
             """
         )
+# {params.VELDIR}/*/*.tsv {params.VELDIR}/*/*.mtx \
+#              {params.GENEDIR}/*/*.tsv {params.GENEDIR}/*/*.mtx \
+#              {params.GENEFULLDIR}/*/*.tsv {params.GENEFULLDIR}/*/*.mtx \
+#              {params.SJDIR}/*/*.tsv {params.SJDIR}/*/*.mtx
 
 rule indexSortedBAM:
     input:
