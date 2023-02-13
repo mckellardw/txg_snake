@@ -79,7 +79,7 @@ rule all:
         # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_merged.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES), 
         # expand('{OUTDIR}/{sample}/kb_wrapper/counts_unfiltered/adata.h5ad', OUTDIR=config['OUTDIR'], sample=SAMPLES),
         # expand('{OUTDIR}/{sample}/kb/counts_unfiltered/output.mtx.gz', OUTDIR=config['OUTDIR'], sample=SAMPLES),
-        expand('{OUTDIR}/{sample}/{REF}/Solo.out/GeneFull/raw/matrix.mtx', OUTDIR=config['OUTDIR'], sample=SAMPLES, REF = ["STARsolo_rRNA","STARsolo"]),
+        expand('{OUTDIR}/{sample}/{REF}/Solo.out/GeneFull/raw/matrix.mtx.gz', OUTDIR=config['OUTDIR'], sample=SAMPLES, REF = ["STARsolo_rRNA","STARsolo"]),
         expand('{OUTDIR}/{sample}/{REF}/Aligned.sortedByCoord.out.bam.bai', OUTDIR=config['OUTDIR'], sample=SAMPLES, REF = ["STARsolo_rRNA","STARsolo"]), #non-deduplicated .bam; used for saturation estimation
         expand('{OUTDIR}/{sample}/qualimap_out/qualimapReport.html', OUTDIR=config['OUTDIR'], sample=SAMPLES), # alignment QC qith qualimap 
         expand('{OUTDIR}/{sample}/Unmapped_fastqc_out', OUTDIR=config['OUTDIR'], sample=SAMPLES), #fastQC results for unmapped reads

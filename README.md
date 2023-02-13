@@ -1,22 +1,23 @@
-# txg_snake
-Preprocessing, alignment, QC, and quantification workflow for 10x Genomics data (Chromium, Visium, & STRS)
+# **txg_snake**
+Flexible preprocessing, alignment, QC, and quantification workflow for 10x Genomics data (Chromium, Visium, & STRS)
 **David W. McKellar**
 
-#README TODO:
-- Required packages & dependencies (add installation via .yml file)
+#TODO:
 - Write out pipeline details
 - Info on sample_sheet format
 
+
 ## Dependencies & Sources:
-- `cutadapt` [v4.1]()
-- `fastqc` [v0.11.8]()
-- `STAR` [v2.7.10b]() # Important!
-- `kallisto` [v1.0.7]()
-- `bustools` [v0.1.0.dev2]()
-- `umi-tools` [v1.1.2]()
-- `qualimap` [v2.2.a]()
+- `cutadapt` [v4.1](https://cutadapt.readthedocs.io/en/stable/index.html)
+- `fastqc` [v0.11.8](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+- `STAR` [v2.7.10b](https://github.com/alexdobin/STAR) # Important!
+- `kallisto` [v1.0.7](https://pachterlab.github.io/kallisto/)
+- `bustools` [v0.1.0.dev2](https://bustools.github.io/)
+- `umi-tools` [v1.1.2](https://umi-tools.readthedocs.io/en/latest/index.html)
+- `qualimap` [v2.2.a](http://qualimap.conesalab.org/)
 - `vsearch` [v2.17.0](https://github.com/torognes/vsearch)
 - `BLAST`
+
 
 ## Format for `sample_sheet`:
 |sampleID      |fastq_R1                                                               |fastq_R2                                                              |chemistry|STAR_rRNA_ref                 |STAR_ref                  |genes_gtf                |kb_idx                               |kb_t2g                                      |
@@ -24,15 +25,34 @@ Preprocessing, alignment, QC, and quantification workflow for 10x Genomics data 
 |sample1       | /path/to/sample1_L001_R1.fastq.gz /path/to/sample1_L002_R1.fastq.gz   | /path/to/sample1_L001_R2.fastq.gz /path/to/sample1_L002_R2.fastq.gz  | Visium    | /path/to/STAR_reference_rRNA | /path/to/STAR_reference  |/path/to/annotations.gtf | /path/to/kallisto/transcriptome.idx | /path/to/kallisto/transcripts_to_genes.txt |
 |sample2      | /path/to/sample2_L001_R1.fastq.gz /path/to/sample2_L002_R1.fastq.gz   | /path/to/sample2_L001_R2.fastq.gz /path/to/sample2_L002_R2.fastq.gz  | STRS    | /path/to/STAR_reference_rRNA | /path/to/STAR_reference  |/path/to/annotations.gtf | /path/to/kallisto/transcriptome.idx | /path/to/kallisto/transcripts_to_genes.txt |
 
+
 ## Generating references:
 #### rRNA STAR reference for in silico rRNA depletion/quantification
-```
-#TODO
-```
+Ribosomal RNA (rRNA) molecules can make alignment/quantification very difficult because of the number of genomic copies of these genes. We added a first-pass-alignment just to rRNA sequences to enable stratified parameterization for these sequences, but maintain the ability to count and analyze them.  
+
+Check out `scripts/GRCm39_GENCODEM31_STAR_rRNA.sh` for an example script showing how to generate a rRNA-only STAR reference using GENCODE annotations.  
+
 #### Genomic STAR reference
+This is a typical STAR reference that you would use for any other alignment job. Here is an example code snippet:
 ```
-#TODO
+FASTA_GENOME="/path/to/GENCODE_M31/GRCm39.genome.fa"
+GENES_DIR="/path/to//GENCODE_M31/gencode.vM31.annotation.gtf"
+
+OUTDIR="/workdir/dwm269/genomes/mm39_all/STAR_GRCm39_GENCODEM31"
+
+mkdir -p ${OUTDIR}
+cd ${OUTDIR}
+
+STAR \
+--runThreadN 16 \
+--runMode genomeGenerate \
+--genomeDir ${OUTDIR} \
+--genomeFastaFiles ${FASTA_DIR} \
+--sjdbGTFfile ${GENES_DIR} \
+--sjdbGTFfeatureExon exon
 ```
+*You can find the reference files on [GENCODE's website](https://www.gencodegenes.org/mouse/)*
+
 
 ## Tree of Outputs:
 ```
@@ -129,7 +149,7 @@ Preprocessing, alignment, QC, and quantification workflow for 10x Genomics data 
 │   │   │   ├── Features.stats
 │   │   │   ├── raw
 │   │   │   │   ├── barcodes.tsv
-│   │   │   │   ├── features.tsv -> /workdir/dwm269/totalRNA/data/align_out/uSTRS_rRNA/{SAMPLE_ID}/STARsolo/SJ.out.tab
+│   │   │   │   ├── features.tsv 
 │   │   │   │   └── matrix.mtx
 │   │   │   └── Summary.csv
 │   │   └── Velocyto
