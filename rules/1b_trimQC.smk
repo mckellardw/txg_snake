@@ -52,6 +52,7 @@ rule cutadapt_R2:
         FINAL_R1_FQ = temp('{OUTDIR}/{sample}/tmp/{sample}_R1_final.fq.gz'),
         FINAL_R2_FQ = temp('{OUTDIR}/{sample}/tmp/{sample}_R2_final.fq.gz')
     params:
+        HOMOPOLYMER_ERROR_RATE = 0.2,
         CUTADAPT_EXEC = config["CUTADAPT_EXEC"],
         THREE_PRIME_R2_POLYA = "A"*100, # 100 A-mer
         THREE_PRIME_R2_POLYG = "G"*100, # 100 G-mer
@@ -66,8 +67,8 @@ rule cutadapt_R2:
         """
         {params.CUTADAPT_EXEC} \
         --minimum-length 18 \
-        -A {params.THREE_PRIME_R2_POLYA} \
-        -A {params.THREE_PRIME_R2_POLYG} \
+        -A "{params.THREE_PRIME_R2_POLYA};max_error_rate={params.HOMOPOLYMER_ERROR_RATE}" \
+        -A "{params.THREE_PRIME_R2_POLYG};max_error_rate={params.HOMOPOLYMER_ERROR_RATE}" \
  		-G {params.FIVE_PRIME_R2_TSO} \
  		-G {params.FIVE_PRIME_R2_rcTSO} \
         --pair-filter=any \
