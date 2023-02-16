@@ -2,7 +2,7 @@
 Flexible preprocessing, alignment, QC, and quantification workflow for 10x Genomics data (Chromium, Visium, & STRS)
 **David W. McKellar**
 
-Contributions are welcome! 
+***Contributions are welcome!***
 
 ## Dependencies & Sources:
 - `cutadapt` [v4.1](https://cutadapt.readthedocs.io/en/stable/index.html)

@@ -1,4 +1,6 @@
+# Trimming for adapters/homopolymers and fastqc before/after
 
+# FastQC on R2 before trimming
 rule preTrim_FastQC_R2:
     input:
         MERGED_R2_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R2.fq.gz'
@@ -21,6 +23,7 @@ rule preTrim_FastQC_R2:
         {input.MERGED_R2_FQ}
         """
 
+# FastQC on R1 before trimming
 rule preTrim_FastQC_R1:
     input:
         MERGED_R1_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R1.fq.gz'
@@ -79,6 +82,7 @@ rule cutadapt_R2:
         {input.MERGED_R1_FQ} {input.MERGED_R2_FQ}
         """
 
+# FastQC on R2 after trimming
 rule postTrim_FastQC_R2:
     input:
         FINAL_R2_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R2_final.fq.gz'
