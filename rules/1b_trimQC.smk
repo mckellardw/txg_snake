@@ -59,6 +59,7 @@ rule cutadapt_R2:
         CUTADAPT_EXEC = config["CUTADAPT_EXEC"],
         THREE_PRIME_R2_POLYA = "A"*100, # 100 A-mer
         THREE_PRIME_R2_POLYG = "G"*100, # 100 G-mer
+        THREE_PRIME_R2_POLYT = "T"*100,
         FIVE_PRIME_R2_TSO = "CCCATGTACTCTGCGTTGATACCACTGCTT", #10x TSO sequence
         FIVE_PRIME_R2_rcTSO = "AAGCAGTGGTATCAACGCAGAGTACATGGG" # rev-comp of 10x TSO sequence
         # FIVE_PRIME_R2 = "TTCGTCACCATAGTTGCGTCTCATGTACCC" #rev 10x TSO sequence
@@ -66,21 +67,23 @@ rule cutadapt_R2:
         config["CORES"]
     log:
         "{OUTDIR}/{sample}/log.cutadapt.json"
-    shell:
-        """
-        {params.CUTADAPT_EXEC} \
-        --minimum-length 18 \
-        -A "{params.THREE_PRIME_R2_POLYA};max_error_rate={params.HOMOPOLYMER_ERROR_RATE}" \
-        -A "{params.THREE_PRIME_R2_POLYG};max_error_rate={params.HOMOPOLYMER_ERROR_RATE}" \
- 		-G {params.FIVE_PRIME_R2_TSO} \
- 		-G {params.FIVE_PRIME_R2_rcTSO} \
-        --pair-filter=any \
- 		-o {output.FINAL_R1_FQ} \
-        -p {output.FINAL_R2_FQ} \
-        --cores {threads} \
-        --json={log} \
-        {input.MERGED_R1_FQ} {input.MERGED_R2_FQ}
-        """
+    run:
+        shell(f"""
+            {params.CUTADAPT_EXEC} \
+            --minimum-length 18 \
+            -A "{params.THREE_PRIME_R2_POLYA};max_error_rate={params.HOMOPOLYMER_ERROR_RATE}" \
+            -A "{params.THREE_PRIME_R2_POLYG};max_error_rate={params.HOMOPOLYMER_ERROR_RATE}" \
+            -A "{params.THREE_PRIME_R2_POLYT};max_error_rate={params.HOMOPOLYMER_ERROR_RATE}" \
+            -G {params.FIVE_PRIME_R2_TSO} \
+            -G {params.FIVE_PRIME_R2_rcTSO} \
+            --pair-filter=any \
+            -o {output.FINAL_R1_FQ} \
+            -p {output.FINAL_R2_FQ} \
+            --cores {threads} \
+            --json={log} \
+            {input.MERGED_R1_FQ} {input.MERGED_R2_FQ}
+            """
+        )
 
 # FastQC on R2 after trimming
 rule postTrim_FastQC_R2:
