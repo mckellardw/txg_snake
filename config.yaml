@@ -8,35 +8,22 @@
 #     For multi-lane inputs, use the following format (from STARsolo github page):
 #       --readFilesIn Read2_Lane1.fastq.gz,Read2_Lane2.fastq.gz,Read2_Lane3.fastq.gz  Read1_Lane1.fastq.gz,Read1_Lane2.fastq.gz,Read1_Lane3.fastq.gz
 
-# SAMPLE_SHEET_PATH: /home/dwm269/private_utils/sample_sheets/visium/uSTRS1b.csv
-SAMPLE_SHEET_PATH: /home/dwm269/private_utils/sample_sheets/visium/flc_v1.csv
+SAMPLE_SHEET_PATH: /home/dwm269/sample_sheets/visium/uSTRS1b.csv
 
+#TODO- stratify core usage for hi/lo requirements?
 CORES: 18 # how many cores to give for each process (snakemake automatically parallelizes process using "snakemake -j {numTotalCores}")
-MEMLIMIT: 50000000000 # limit in bytes
+MEMLIMIT: 500000000000 # limit in bytes
 
 ## Chemistry details (whitelists, barcode/UMI design, etc.)
 CHEMISTRY_SHEET: resources/chemistry_sheet.csv
-# CHEMISTRY: visium
 
 FASTQC_ADAPTERS: resources/fastqc_adapters.txt
 
 ########################################################################################################
 # Important directory file paths
 ########################################################################################################
-# TMPDIR: /workdir/dwm269/totalRNA/tmp # directory for temporary files
-# OUTDIR: /workdir/dwm269/totalRNA/data/STARsolo/GRCm39_GENCODEM28_Chromium
-# OUTDIR: /workdir/dwm269/totalRNA/data/STARsolo/GRCm39_GENCODEM27_Visium
-# OUTDIR: /workdir/dwm269/totalRNA/data/STARsolo/GRCm39_GENCODEM28_Visium/FLExDUX4
-# OUTDIR: /workdir/dwm269/totalRNA/data/STARsolo/uSTRS
-
-# TMPDIR: /workdir/dwm269/scCardiacOrganoid/tmp
-# OUTDIR: /workdir/dwm269/scCardiacOrganoid/data/STARsolo/GRCh38p13
-
-# TMPDIR: /workdir/dwm269/butcher_kd/tmp
-# OUTDIR: /workdir/dwm269/butcher_kd/data/STARsolo/Sus_scrofa_EGFP
-
-TMPDIR: /workdir/dwm269/flc_sethupathy/tmp
-OUTDIR: /workdir/dwm269/flc_sethupathy/data/align_out
+TMPDIR: /workdir/dwm269/totalRNA/tmp # directory for temporary files
+OUTDIR: /workdir/dwm269/totalRNA/data/align_out/STRS_rRNA #uSTRS_rRNA
 
 ########################################################################################################
 # Executables - file paths
@@ -53,6 +40,7 @@ QUALIMAP_EXEC: qualimap
 BAM2SPLITBW: /home/dwm269/DWM_utils/seq_utils/bam2splitBigWig.sh #Custom function in DWM_utils that splits a bam file by strand and converts it into bigwig format
 FASTX_COLLAPSER: fastx_collapser
 BLASTDB: /shared_data/genome_db/BLAST_NCBI # path to where the nt BLAST database is stored
+
 PICARD_EXEC: /home/dwm269/miniconda3/envs/STARsolo/share/picard-2.26.10-0/picard.jar
 
 ########################################################################################################

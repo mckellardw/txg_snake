@@ -15,17 +15,19 @@ rule unmapped_fastqc:
         FASTQC_EXEC = config['FASTQC_EXEC']
     threads:
         config['CORES']
-    shell:
-        """
-        mv {input.UNMAPPED1} {input.UNMAPPED2}.fastq
-        mv {input.UNMAPPED2} {input.UNMAPPED1}.fastq
+    run:
+        shell(
+            f"""
+            mv {input.UNMAPPED1} {input.UNMAPPED2}.fastq
+            mv {input.UNMAPPED2} {input.UNMAPPED1}.fastq
 
-        pigz -p{threads} {input.UNMAPPED1}.fastq {input.UNMAPPED2}.fastq
+            pigz -p{threads} {input.UNMAPPED1}.fastq {input.UNMAPPED2}.fastq
 
-        mkdir -p {output.FQC_DIR}
+            mkdir -p {output.FQC_DIR}
 
-        {params.FASTQC_EXEC} -o {output.FQC_DIR} -t {threads} {output.UNMAPPED1_FQ} {output.UNMAPPED2_FQ}
-        """
+            {params.FASTQC_EXEC} -o {output.FQC_DIR} -t {threads} {output.UNMAPPED1_FQ} {output.UNMAPPED2_FQ}
+            """
+        )
 
 # Only BLAST R2, which contains the insert (converts .fq to .fa, then removes the .fa file)
 ## TODO: change demux step to fastx-collapser
@@ -40,21 +42,23 @@ rule blast_unmapped:
         blastDB = config['BLASTDB'],
         FASTX_COLLAPSER = config['FASTX_COLLAPSER'],
         TMP_FA = '{OUTDIR}/{sample}/Unmapped.out.mate2.fa'
-    shell:
-        """
-        zcat {input.UNMAPPED2_FQ} | sed -n '1~4s/^@/>/p;2~4p' > {params.TMP_FA}
+    run:
+        shell(
+            f"""
+            zcat {input.UNMAPPED2_FQ} | sed -n '1~4s/^@/>/p;2~4p' > {params.TMP_FA}
 
-        echo "Number of unmapped reads: "
-        grep -c ">" {params.TMP_FA}
+            echo "Number of unmapped reads: "
+            grep -c ">" {params.TMP_FA}
 
-        vsearch --sortbysize {params.TMP_FA} --topn 1000 --output tmp.fa
+            vsearch --sortbysize {params.TMP_FA} --topn 1000 --output {wildcards.sample}/top_1000.fa
 
-        blastn -db {params.blastDB}/nt \
-        -query tmp.fa \
-        -out {output.BLAST_R2} \
-        -outfmt '6 qseqid sseqid stitle pident length mismatch gapopen qstart qend sstart send evalue bitscore' \
-        -max_target_seqs 5 \
-        -num_threads {threads}
+            blastn -db {params.blastDB}/nt \
+            -query {wildcards.sample}/top_1000.fa \
+            -out {output.BLAST_R2} \
+            -outfmt '6 qseqid sseqid stitle pident length mismatch gapopen qstart qend sstart send evalue bitscore' \
+            -max_target_seqs 5 \
+            -num_threads {threads}
 
-        rm {params.TMP_FA}
-		"""
+            rm {params.TMP_FA}
+            """
+        )
