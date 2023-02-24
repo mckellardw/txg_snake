@@ -5,25 +5,21 @@
 ########################################################################################################
 
 # Sample sheet requires a sampleID, and locations of fastqs for R1 and R2
-#     For multi-lane inputs, use the following format (from STARsolo github page):
-#       --readFilesIn Read2_Lane1.fastq.gz,Read2_Lane2.fastq.gz,Read2_Lane3.fastq.gz  Read1_Lane1.fastq.gz,Read1_Lane2.fastq.gz,Read1_Lane3.fastq.gz
-
-SAMPLE_SHEET_PATH: /home/dwm269/sample_sheets/visium/uSTRS1b.csv
+SAMPLE_SHEET_PATH: /home/dwm269/sample_sheets/visium/STRS6.csv
 
 #TODO- stratify core usage for hi/lo requirements?
-CORES: 18 # how many cores to give for each process (snakemake automatically parallelizes process using "snakemake -j {numTotalCores}")
+CORES: 12 # how many cores to give for each process (snakemake automatically parallelizes process using "snakemake -j {numTotalCores}")
 MEMLIMIT: 500000000000 # limit in bytes
 
 ## Chemistry details (whitelists, barcode/UMI design, etc.)
 CHEMISTRY_SHEET: resources/chemistry_sheet.csv
-
 FASTQC_ADAPTERS: resources/fastqc_adapters.txt
 
 ########################################################################################################
 # Important directory file paths
 ########################################################################################################
 TMPDIR: /workdir/dwm269/totalRNA/tmp # directory for temporary files
-OUTDIR: /workdir/dwm269/totalRNA/data/align_out/STRS_rRNA #uSTRS_rRNA
+OUTDIR: /workdir/dwm269/totalRNA/data/align_out/STRS_rRNA 
 
 ########################################################################################################
 # Executables - file paths
@@ -41,8 +37,3 @@ BAM2SPLITBW: /home/dwm269/DWM_utils/seq_utils/bam2splitBigWig.sh #Custom functio
 FASTX_COLLAPSER: fastx_collapser
 BLASTDB: /shared_data/genome_db/BLAST_NCBI # path to where the nt BLAST database is stored
 
-PICARD_EXEC: /home/dwm269/miniconda3/envs/STARsolo/share/picard-2.26.10-0/picard.jar
-
-########################################################################################################
-# Resources - file paths
-########################################################################################################

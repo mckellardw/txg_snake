@@ -49,7 +49,6 @@ QUALIMAP_EXEC = config["QUALIMAP_EXEC"]
 BAM2SPLITBW = config["BAM2SPLITBW"]
 FASTX_COLLAPSER = config["FASTX_COLLAPSER"]
 BLASTDB = config["BLASTDB"]
-PICARD_EXEC = config["PICARD_EXEC"]
 
 ########################################################################################################
 # Pre-run setup
