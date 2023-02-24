@@ -1,4 +1,5 @@
-# **txg_snake**
+![txg_snake](txg_snake_logo.png)
+
 Flexible preprocessing, alignment, QC, and quantification workflow for 10x Genomics data (Chromium, Visium, & STRS)
 **David W. McKellar**
 
