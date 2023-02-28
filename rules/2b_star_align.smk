@@ -87,7 +87,7 @@ rule compress_STAR_outs:
     run:
         shell(
             f"""
-            pigz -p{threads} {OUTDIR}/{wildcards.sample}/STARsolo/*/*/*.tsv {OUTDIR}/{wildcards.sample}/STARsolo/*/*/*.mtx
+            pigz -p{threads} {OUTDIR}/{wildcards.sample}/STARsolo/Solo.out/*/*/*.tsv {OUTDIR}/{wildcards.sample}/STARsolo/Solo.out/*/*/*.mtx
             """
         )
 # {params.VELDIR}/*/*.tsv {params.VELDIR}/*/*.mtx \

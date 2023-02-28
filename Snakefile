@@ -73,12 +73,21 @@ for i in range(0,SAMPLE_SHEET.shape[0]):
 rule all:
     input:
         # expand('{OUTDIR}/{sample}/STARsolo/Solo.out/Gene/raw_feature_bc_matrix_h5.h5', OUTDIR=config['OUTDIR'], sample=SAMPLES),
-        # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.bam.bai', OUTDIR=config['OUTDIR'], sample=SAMPLES), # umi_tools deduplicated .bam
+        expand( # umi_tools deduplicated .bam/.bai
+            '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.bam.bai', 
+            OUTDIR=config['OUTDIR'], 
+            sample=SAMPLES
+        ), 
         # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_plus.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES), # strand-split bigWigs
         # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_merged.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES), 
         # expand('{OUTDIR}/{sample}/kb_wrapper/counts_unfiltered/adata.h5ad', OUTDIR=config['OUTDIR'], sample=SAMPLES),
-        # expand('{OUTDIR}/{sample}/kb/counts_unfiltered/output.mtx.gz', OUTDIR=config['OUTDIR'], sample=SAMPLES),
-        expand( # gzipped count matrices
+        expand( # gzipped kallisto/bustool count matrices
+            '{OUTDIR}/{sample}/kb/counts_unfiltered/{FILE}.gz', 
+            OUTDIR=config['OUTDIR'],
+            FILE = ["output.mtx", "output.genes.txt", "output.barcodes.txt"],
+            sample=SAMPLES
+        ),
+        expand( # gzipped STARsolo count matrices
             '{OUTDIR}/{sample}/{REF}/Solo.out/GeneFull/raw/matrix.mtx.gz', 
             OUTDIR=config['OUTDIR'], 
             sample=SAMPLES, REF = ["STARsolo_rRNA","STARsolo"]
