@@ -1,10 +1,10 @@
 ## qualimap on aligned reads
 rule qualimapQC:
     input:
-        SORTEDBAM = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.out.bam'
+        SORTEDBAM = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.out.bam' #TODO - change to deduped bam
     output:
-        qualimapDir = directory('{OUTDIR}/{sample}/qualimap_out'),
-        fastqcReport = '{OUTDIR}/{sample}/qualimap_out/qualimapReport.html'
+        qualimapDir = directory('{OUTDIR}/{sample}/qualimap'),
+        qualimapReport = '{OUTDIR}/{sample}/qualimap/qualimapReport.html'
     params:
         MEM = "24G"
     threads:
@@ -16,7 +16,7 @@ rule qualimapQC:
             mkdir -p {output.qualimapDir}
             cd {output.qualimapDir}
 
-            qualimap rnaseq \
+            {QUALIMAP_EXEC} rnaseq \
             -bam {input.SORTEDBAM} \
             -gtf {GENES_GTF} \
             --sequencing-protocol strand-specific-forward \

@@ -5,49 +5,53 @@ rule preTrim_FastQC_R2:
     input:
         MERGED_R2_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R2.fq.gz'
     output:
-        fastqcDir = directory('{OUTDIR}/{sample}/preTrim_fastqc_R2_out'),
+        fastqcDir = directory('{OUTDIR}/{sample}/preTrim_fastqc_R2'),
         # fastqcReport = ''
     params:
         adapters = config['FASTQC_ADAPTERS']
     threads:
         config['CORES']
         # min([config['CORES'],8]) # 8 core max based on recommendations from trim_galore authors
-    shell:
-        """
-        mkdir -p {output.fastqcDir}
+    run:
+        shell(
+            f"""
+            mkdir -p {output.fastqcDir}
 
-        {FASTQC_EXEC}  \
-        --outdir {output.fastqcDir} \
-        --threads {threads} \
-        -a {params.adapters} \
-        {input.MERGED_R2_FQ}
-        """
+            {FASTQC_EXEC}  \
+            --outdir {output.fastqcDir} \
+            --threads {threads} \
+            -a {params.adapters} \
+            {input.MERGED_R2_FQ}
+            """
+        )
 
 # FastQC on R1 before trimming
 rule preTrim_FastQC_R1:
     input:
         MERGED_R1_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R1.fq.gz'
     output:
-        fastqcDir = directory('{OUTDIR}/{sample}/preTrim_fastqc_R1_out'),
+        fastqcDir = directory('{OUTDIR}/{sample}/preTrim_fastqc_R1'),
         # fastqcReport = ''
     params:
         adapters = config['FASTQC_ADAPTERS']
     threads:
         config['CORES']
         # min([config['CORES'],8]) # 8 core max based on recommendations from trim_galore authors
-    shell:
-        """
-        mkdir -p {output.fastqcDir}
+    run:
+        shell(
+            f"""
+            mkdir -p {output.fastqcDir}
 
-        {FASTQC_EXEC} \
-        --outdir {output.fastqcDir} \
-        --threads {threads} \
-        -a {params.adapters} \
-        {input.MERGED_R1_FQ}
-        """
+            {FASTQC_EXEC} \
+            --outdir {output.fastqcDir} \
+            --threads {threads} \
+            -a {params.adapters} \
+            {input.MERGED_R1_FQ}
+            """
+        )
 
 # TSO, polyA, and polyG trimming
-rule cutadapt_R2:
+rule cutadapt:
     input:
         MERGED_R1_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R1.fq.gz',
         MERGED_R2_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R2.fq.gz'
@@ -56,7 +60,6 @@ rule cutadapt_R2:
         FINAL_R2_FQ = temp('{OUTDIR}/{sample}/tmp/{sample}_R2_final.fq.gz')
     params:
         HOMOPOLYMER_ERROR_RATE = 0.2,
-        CUTADAPT_EXEC = config["CUTADAPT_EXEC"],
         THREE_PRIME_R2_POLYA = "A"*100, # 100 A-mer
         THREE_PRIME_R2_POLYG = "G"*100, # 100 G-mer
         THREE_PRIME_R2_POLYT = "T"*100,
@@ -69,7 +72,7 @@ rule cutadapt_R2:
         "{OUTDIR}/{sample}/log.cutadapt.json"
     run:
         shell(f"""
-            {params.CUTADAPT_EXEC} \
+            {CUTADAPT_EXEC} \
             --minimum-length 18 \
             -A "{params.THREE_PRIME_R2_POLYA};max_error_rate={params.HOMOPOLYMER_ERROR_RATE}" \
             -A "{params.THREE_PRIME_R2_POLYG};max_error_rate={params.HOMOPOLYMER_ERROR_RATE}" \
@@ -85,25 +88,52 @@ rule cutadapt_R2:
             """
         )
 
-# FastQC on R2 after trimming
-rule postTrim_FastQC_R2:
+# FastQC on R1 after trimming
+rule postTrim_FastQC_R1:
     input:
-        FINAL_R2_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R2_final.fq.gz'
+        FINAL_R1_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R1_final.fq.gz'
     output:
-        fastqcDir = directory('{OUTDIR}/{sample}/postTrim_fastqc_R2_out'),
+        fastqcDir = directory('{OUTDIR}/{sample}/postTrim_fastqc_R1'),
         # fastqcReport = ''
     params:
         adapters = config['FASTQC_ADAPTERS']
     threads:
         config['CORES']
         # min([config['CORES'],8]) # 8 core max based on recommendations from trim_galore authors
-    shell:
-        """
-        mkdir -p {output.fastqcDir}
+    run:
+        shell(
+            f"""
+            mkdir -p {output.fastqcDir}
 
-        {FASTQC_EXEC} \
-        --outdir {output.fastqcDir} \
-        --threads {threads} \
-        -a {params.adapters} \
-        {input.FINAL_R2_FQ}
-        """
+            {FASTQC_EXEC} \
+            --outdir {output.fastqcDir} \
+            --threads {threads} \
+            -a {params.adapters} \
+            {input.FINAL_R1_FQ}
+            """
+        )
+
+# FastQC on R2 after trimming
+rule postTrim_FastQC_R2:
+    input:
+        FINAL_R2_FQ = '{OUTDIR}/{sample}/tmp/{sample}_R2_final.fq.gz'
+    output:
+        fastqcDir = directory('{OUTDIR}/{sample}/postTrim_fastqc_R2'),
+        # fastqcReport = ''
+    params:
+        adapters = config['FASTQC_ADAPTERS']
+    threads:
+        config['CORES']
+        # min([config['CORES'],8]) # 8 core max based on recommendations from trim_galore authors
+    run:
+        shell(
+            f"""
+            mkdir -p {output.fastqcDir}
+
+            {FASTQC_EXEC} \
+            --outdir {output.fastqcDir} \
+            --threads {threads} \
+            -a {params.adapters} \
+            {input.FINAL_R2_FQ}
+            """
+        )

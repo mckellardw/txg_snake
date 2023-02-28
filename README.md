@@ -3,7 +3,7 @@
 Flexible preprocessing, alignment, QC, and quantification workflow for 10x Genomics data (Chromium, Visium, & STRS)
 **David W. McKellar**
 
-***Contributions are welcome!***
+The goal of this project is to build a workflow for assessing different alignment parameterizations, and digging into artifacts that arise from modifying 10x's chemistries. ***Contributions are welcome!*** See the companion workflow for Curio's SlideSeq (Seeker) [here](https://github.com/mckellardw/slide_snake).  
 
 ## Dependencies & Sources:
 - `cutadapt` [v4.1](https://cutadapt.readthedocs.io/en/stable/index.html)
@@ -56,16 +56,16 @@ STAR \
 ```
 {SAMPLE_ID}/
 ├── log.cutadapt.json
-├── postTrim_fastqc_R2_out
+├── postTrim_fastqc_R2
 │   ├── {SAMPLE_ID}_R2_final_fastqc.html
 │   └── {SAMPLE_ID}_R2_final_fastqc.zip
-├── preTrim_fastqc_R1_out
+├── preTrim_fastqc_R1
 │   ├── {SAMPLE_ID}_R1_fastqc.html
 │   └── {SAMPLE_ID}_R1_fastqc.zip
-├── preTrim_fastqc_R2_out
+├── preTrim_fastqc_R2
 │   ├── {SAMPLE_ID}_R2_fastqc.html
 │   └── {SAMPLE_ID}_R2_fastqc.zip
-├── qualimap_out
+├── qualimap
 │   ├── css
 │   │   ├── agogo.css
 │   │   ├── ajax-loader.gif
@@ -103,7 +103,7 @@ STAR \
 │   │   ├── coverage_profile_along_genes_(low).txt
 │   │   └── coverage_profile_along_genes_(total).txt
 │   └── rnaseq_qc_results.txt
-├── rRNA_filtered_fastqc_out
+├── rRNA_filtered_fastqc
 │   ├── {SAMPLE_ID}_R1_final_filtered_fastqc.html
 │   ├── {SAMPLE_ID}_R1_final_filtered_fastqc.zip
 │   ├── {SAMPLE_ID}_R2_final_filtered_fastqc.html
@@ -196,7 +196,7 @@ STAR \
 │   ├── {SAMPLE_ID}_R2_final_filtered.fq.gz
 │   ├── {SAMPLE_ID}_R2_final.fq.gz
 │   └── {SAMPLE_ID}_R2.fq.gz
-└── Unmapped_fastqc_out
+└── Unmapped_fastqc
     ├── Unmapped.out.mate1_fastqc.html
     ├── Unmapped.out.mate1_fastqc.zip
     ├── Unmapped.out.mate2_fastqc.html

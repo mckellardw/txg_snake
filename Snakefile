@@ -78,15 +78,40 @@ rule all:
         # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_merged.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES), 
         # expand('{OUTDIR}/{sample}/kb_wrapper/counts_unfiltered/adata.h5ad', OUTDIR=config['OUTDIR'], sample=SAMPLES),
         # expand('{OUTDIR}/{sample}/kb/counts_unfiltered/output.mtx.gz', OUTDIR=config['OUTDIR'], sample=SAMPLES),
-        expand('{OUTDIR}/{sample}/{REF}/Solo.out/GeneFull/raw/matrix.mtx.gz', OUTDIR=config['OUTDIR'], sample=SAMPLES, REF = ["STARsolo_rRNA","STARsolo"]),
-        expand('{OUTDIR}/{sample}/{REF}/Aligned.sortedByCoord.out.bam.bai', OUTDIR=config['OUTDIR'], sample=SAMPLES, REF = ["STARsolo_rRNA","STARsolo"]), #non-deduplicated .bam; used for saturation estimation
-        expand('{OUTDIR}/{sample}/qualimap_out/qualimapReport.html', OUTDIR=config['OUTDIR'], sample=SAMPLES), # alignment QC qith qualimap 
-        expand('{OUTDIR}/{sample}/Unmapped_fastqc_out', OUTDIR=config['OUTDIR'], sample=SAMPLES), #fastQC results for unmapped reads
+        expand( # gzipped count matrices
+            '{OUTDIR}/{sample}/{REF}/Solo.out/GeneFull/raw/matrix.mtx.gz', 
+            OUTDIR=config['OUTDIR'], 
+            sample=SAMPLES, REF = ["STARsolo_rRNA","STARsolo"]
+        ),
+        expand( #non-deduplicated .bam; used for saturation estimation
+            '{OUTDIR}/{sample}/{REF}/Aligned.sortedByCoord.out.bam.bai', 
+            OUTDIR=config['OUTDIR'], 
+            sample=SAMPLES, 
+            REF = ["STARsolo_rRNA","STARsolo"]
+        ), 
+        expand( # alignment QC with qualimap #TODO- add rRNA qualimap
+            '{OUTDIR}/{sample}/qualimap/qualimapReport.html', 
+            OUTDIR=config['OUTDIR'], 
+            sample=SAMPLES
+        ), 
+        expand(#fastQC results for unmapped reads
+            '{OUTDIR}/{sample}/Unmapped_fastqc', 
+            OUTDIR=config['OUTDIR'],
+            sample=SAMPLES
+        ), 
         # expand('{OUTDIR}/{sample}/Unmapped.out.mate2_blastResults.txt', OUTDIR=config['OUTDIR'], sample=SAMPLES), # blastn results for unmapped R1 reads non-strand-split bigWigs (for
-        expand('{OUTDIR}/{sample}/preTrim_fastqc_R1_out', OUTDIR=config['OUTDIR'], sample=SAMPLES), # raw R1 fastQC results
-        expand('{OUTDIR}/{sample}/preTrim_fastqc_R2_out', OUTDIR=config['OUTDIR'], sample=SAMPLES), # raw R2 fastQC results
-        expand('{OUTDIR}/{sample}/postTrim_fastqc_R2_out', OUTDIR=config['OUTDIR'], sample=SAMPLES), # adapter/polyA/ployG-trimmed R2 fastQC results
-        expand('{OUTDIR}/{sample}/log.cutadapt.json', OUTDIR=config['OUTDIR'], sample=SAMPLES)
+        expand( # fastQC results
+            '{OUTDIR}/{sample}/{TRIM}_fastqc_{READ}', 
+            OUTDIR=config['OUTDIR'], 
+            sample=SAMPLES, 
+            READ = ["R1", "R2"], 
+            TRIM=["preTrim","postTrim"]
+            ), 
+        expand( # cutadapt log files
+            '{OUTDIR}/{sample}/log.cutadapt.json',
+            OUTDIR=config['OUTDIR'], 
+            sample=SAMPLES
+        )
 
 
 # Aggregating and QCing raw read data
