@@ -1,13 +1,15 @@
 # Remove reads that don't have a corrected spot/cell barcode with samtools, then remove duplicates w/ **umi-tools**
 ## High mem usage? Check here! https://umi-tools.readthedocs.io/en/latest/faq.html
+### TODO- add stats
 rule umitools_dedupBAM:
     input:
-        SORTEDBAM = '{OUTDIR}/{sample}/Aligned.sortedByCoord.out.bam',
-        SORTEDBAMINDEX = '{OUTDIR}/{sample}/Aligned.sortedByCoord.out.bam.bai'
+        SORTEDBAM = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.out.bam',
+        SORTEDBAMINDEX = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.out.bam.bai'
     output:
-        DEDUPBAM = '{OUTDIR}/{sample}/Aligned.sortedByCoord.dedup.out.bam'
-    params:
-        OUTPUT_PREFIX='{OUTDIR}/{sample}/umitools_dedup/{sample}'
+        DEDUPBAM = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.bam',
+        DEDUPBAI = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.bam.bai'
+    # params:
+    #     OUTPUT_PREFIX='{OUTDIR}/{sample}/umitools_dedup/{sample}'
     threads:
         config['CORES']
     log:
@@ -39,6 +41,12 @@ rule umitools_dedupBAM:
         #     -S {output.DEDUPBAM}
         # """
         # )
+
+        # INBAM=$1 # path to .bam file (sorted & indexed already!)
+        # BB=$2 # path to barcode whitelist
+        # CORE=$3 # number of cores for parallelization
+        # OUTBAM=$4 # output/deduped bam path
+        # TMPDIR=$5
         shell(
             f"""
             bash scripts/split_dedup.sh {input.SORTEDBAM} {whitelist} {threads} {output.DEDUPBAM} {OUTDIR}/{wildcards.sample}/tmp/dedup | tee {log}
@@ -46,25 +54,25 @@ rule umitools_dedupBAM:
         )
 
 # Index the deduped .bam file
-rule umitools_indexDedupBAM:
-    input:
-        SORTEDBAM = '{OUTDIR}/{sample}/Aligned.sortedByCoord.dedup.out.bam'
-    output:
-        BAI = '{OUTDIR}/{sample}/Aligned.sortedByCoord.dedup.out.bam.bai'
-    threads:
-        config['CORES']
-    shell:
-        """
-        samtools index -@ {threads} {input.SORTEDBAM}
-        """
+# rule umitools_indexDedupBAM:
+#     input:
+#         SORTEDBAM = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.bam'
+#     output:
+#         BAI = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.bam.bai'
+#     threads:
+#         config['CORES']
+#     shell:
+#         """
+#         samtools index -@ {threads} {input.SORTEDBAM}
+#         """
 
 # Split .bam file by strand for IGV browsing
 rule strand_split_dedup_bam:
     input:
-        DEDUPBAM = '{OUTDIR}/{sample}/Aligned.sortedByCoord.dedup.out.bam'
+        DEDUPBAM = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.bam'
     output:
-        FWDBAM = '{OUTDIR}/{sample}/Aligned.sortedByCoord.dedup.out.fwd.bam',
-        REVBAM = '{OUTDIR}/{sample}/Aligned.sortedByCoord.dedup.out.rev.bam'
+        FWDBAM = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.fwd.bam',
+        REVBAM = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.rev.bam'
     threads:
         1
     run:
@@ -78,11 +86,11 @@ rule strand_split_dedup_bam:
 # Index the split/deduped bam files
 rule indexSplitBAMs:
     input:
-        FWDBAM = '{OUTDIR}/{sample}/Aligned.sortedByCoord.dedup.out.fwd.bam',
-        REVBAM = '{OUTDIR}/{sample}/Aligned.sortedByCoord.dedup.out.rev.bam'
+        FWDBAM = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.fwd.bam',
+        REVBAM = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.rev.bam'
     output:
-        FWDBAI = '{OUTDIR}/{sample}/Aligned.sortedByCoord.dedup.out.fwd.bam.bai',
-        REVBAI = '{OUTDIR}/{sample}/Aligned.sortedByCoord.dedup.out.rev.bam.bai'
+        FWDBAI = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.fwd.bam.bai',
+        REVBAI = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.rev.bam.bai'
     threads:
         config['CORES']
     shell:

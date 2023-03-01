@@ -1,7 +1,6 @@
 ![txg_snake](txg_snake_logo.png)
 
 Flexible preprocessing, alignment, QC, and quantification workflow for 10x Genomics data (Chromium, Visium, & STRS)
-**David W. McKellar**
 
 The goal of this project is to build a workflow for assessing different alignment parameterizations, and digging into artifacts that arise from modifying 10x's chemistries. ***Contributions are welcome!*** See the companion workflow for Curio's SlideSeq (Seeker) [here](https://github.com/mckellardw/slide_snake).  
 
@@ -50,6 +49,12 @@ STAR \
 --sjdbGTFfeatureExon exon
 ```
 *You can find the reference files on [GENCODE's website](https://www.gencodegenes.org/mouse/)*
+
+## small/micro RNA analysis
+
+### miRge3.0
+- [Link to documentation](https://mirge3.readthedocs.io/en/latest/quick_start.html)
+- [Link to library download](https://sourceforge.net/projects/mirge3/files/miRge3_Lib/)
 
 
 ## Tree of Outputs:

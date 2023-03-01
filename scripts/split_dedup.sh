@@ -11,30 +11,12 @@
 #TODO: python script instead of bash to make parallelization a bit easier?
 
 INBAM=$1 # path to .bam file (sorted & indexed already!)
-BB=$2 # path to barcode whitelist
+WHITELIST=$2 # path to barcode whitelist
 CORE=$3 # number of cores for parallelization
 OUTBAM=$4 # output/deduped bam path
 TMPDIR=$5
 LOG=$6
 
-
-mkdir -p ${TMPDIR}
-cd ${TMPDIR}
-
-# echo "Log for chr_split_dedup:" > ${LOG}
-# echo "Log info can be found in "${LOG}
-
-PREFIX=`echo ${INBAM} | rev | cut -d / -f 1 | cut -d . -f 2- | rev`
-
-# echo "Using "${PREFIX}" as file prefix..." 
-
-# OUTBAM=${OUTDIR}/${PREFIX}_dedup.bam
-
-echo ".bam file location:    "${INBAM} 
-echo "Max cores:             "${CORE} 
-echo "Output location:       "${OUTBAM} 
-echo 
-echo 
 
 # Check params...
 if [ ! -f ${INBAM} ]
@@ -49,6 +31,29 @@ then
     samtools index -@ ${CORE} ${INBAM}
 fi
 
+# Print params
+echo ".bam file location:    "${INBAM} 
+echo "Max cores:             "${CORE} 
+echo "Whitelist:             "${WHITELIST} 
+echo "Output location:       "${OUTBAM} 
+echo 
+echo 
+
+# echo "Log for chr_split_dedup:" > ${LOG}
+# echo "Log info can be found in "${LOG}
+
+# PREFIX=`echo ${INBAM} | rev | cut -d / -f 1 | cut -d . -f 2- | rev`
+
+# echo "Using "${PREFIX}" as file prefix..." 
+
+# OUTBAM=${OUTDIR}/${PREFIX}_dedup.bam
+
+# Make tmpdir and copy whitelist into it
+mkdir -p ${TMPDIR}
+cp ${WHITELIST} ${TMPDIR}/whitelist.txt
+WHITELIST=${TMPDIR}/whitelist.txt
+cd ${TMPDIR}
+
 # Remove reads that don't have a barcode (CB)
 echo "Removing reads without 'CB' or 'UB' tags..." 
 date 
@@ -56,7 +61,7 @@ date
 samtools view \
 -h \
 -@ ${CORE} \
---tag-file CB:${BB} \
+--tag-file CB:${WHITELIST} \
 ${INBAM} \
 | grep -v "UB:Z:-" \
 | samtools view -bS \

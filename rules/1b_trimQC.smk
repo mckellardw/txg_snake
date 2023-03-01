@@ -73,7 +73,7 @@ rule cutadapt:
     run:
         shell(f"""
             {CUTADAPT_EXEC} \
-            --minimum-length 18 \
+            --minimum-length 12 \
             -A "{params.THREE_PRIME_R2_POLYA};max_error_rate={params.HOMOPOLYMER_ERROR_RATE}" \
             -A "{params.THREE_PRIME_R2_POLYG};max_error_rate={params.HOMOPOLYMER_ERROR_RATE}" \
             -A "{params.THREE_PRIME_R2_POLYT};max_error_rate={params.HOMOPOLYMER_ERROR_RATE}" \

@@ -11,14 +11,13 @@ rule STARsolo_align:
         UNMAPPED2 = '{OUTDIR}/{sample}/STARsolo/Unmapped.out.mate2',
         GENE = directory('{OUTDIR}/{sample}/STARsolo/Solo.out/Gene'),
         GENEFULL = directory('{OUTDIR}/{sample}/STARsolo/Solo.out/GeneFull'),
-        SJ = directory('{OUTDIR}/{sample}/STARsolo/Solo.out/SJ'),
+        # SJ = directory('{OUTDIR}/{sample}/STARsolo/Solo.out/SJ'),
         VEL = directory('{OUTDIR}/{sample}/STARsolo/Solo.out/Velocyto'),
         GENEMAT = '{OUTDIR}/{sample}/STARsolo/Solo.out/Gene/raw/matrix.mtx',
         GENEFULLMAT = '{OUTDIR}/{sample}/STARsolo/Solo.out/GeneFull/raw/matrix.mtx',
-        SJMAT = '{OUTDIR}/{sample}/STARsolo/Solo.out/SJ/raw/matrix.mtx',
+        # SJMAT = '{OUTDIR}/{sample}/STARsolo/Solo.out/SJ/raw/matrix.mtx',
         VELMAT = '{OUTDIR}/{sample}/STARsolo/Solo.out/Velocyto/raw/spliced.mtx'
     params:
-        STAR_EXEC = config['STAR_EXEC'],
         MEMLIMIT = config['MEMLIMIT']
     threads:
         config['CORES']
@@ -37,7 +36,7 @@ rule STARsolo_align:
             f"""
             mkdir -p {OUTDIR}/{wildcards.sample}
 
-            {params.STAR_EXEC} \
+            {STAR_EXEC} \
             --runThreadN {threads} \
             --outFileNamePrefix {OUTDIR}/{wildcards.sample}/STARsolo/ \
             --outSAMtype BAM SortedByCoordinate \
@@ -54,10 +53,12 @@ rule STARsolo_align:
             --soloBarcodeReadLength 0 \
             --soloCBwhitelist {CB_WHITELIST} \
             --soloCellFilter EmptyDrops_CR \
-            --soloFeatures Gene GeneFull SJ Velocyto \
+            --soloFeatures Gene GeneFull Velocyto \
             --soloMultiMappers EM
             """
         )
+        # Note - adding `SJ` matrix causes downstream issue with pigz compression b/c features.tsv is written as a symlink
+
             #STRS parameters:
             # --outFilterMismatchNoverLmax 0.05 \
             # --outFilterMatchNmin 12 \
@@ -68,33 +69,30 @@ rule STARsolo_align:
 rule compress_STAR_outs:
     input:
         VELMAT = "{OUTDIR}/{sample}/STARsolo/Solo.out/Velocyto/raw/spliced.mtx",
-        SJMAT = "{OUTDIR}/{sample}/STARsolo/Solo.out/SJ/raw/matrix.mtx",
+        # SJMAT = "{OUTDIR}/{sample}/STARsolo/Solo.out/SJ/raw/matrix.mtx",
         GENEMAT = "{OUTDIR}/{sample}/STARsolo/Solo.out/Gene/raw/matrix.mtx",
         GENEFULLMAT = "{OUTDIR}/{sample}/STARsolo/Solo.out/GeneFull/raw/matrix.mtx"
     output:
         VELMAT = "{OUTDIR}/{sample}/STARsolo/Solo.out/Velocyto/raw/spliced.mtx.gz",
-        SJMAT = "{OUTDIR}/{sample}/STARsolo/Solo.out/SJ/raw/matrix.mtx.gz",
+        # SJMAT = "{OUTDIR}/{sample}/STARsolo/Solo.out/SJ/raw/matrix.mtx.gz",
         GENEMAT = "{OUTDIR}/{sample}/STARsolo/Solo.out/Gene/raw/matrix.mtx.gz",
         GENEFULLMAT = "{OUTDIR}/{sample}/STARsolo/Solo.out/GeneFull/raw/matrix.mtx.gz"
     params:
-        # SOLODIR = "{DATADIR}/align_out/{sample}/STARsolo/Solo.out/"
-        VELDIR = directory("{OUTDIR}/{sample}/STARsolo/Solo.out/Velocyto"),
-        SJDIR = directory("{OUTDIR}/{sample}/STARsolo/Solo.out/SJ"),
-        GENEDIR = directory("{OUTDIR}/{sample}/STARsolo/Solo.out/Gene"),
-        GENEFULLDIR = directory("{OUTDIR}/{sample}/STARsolo/Solo.out/GeneFull")
+        SOLODIR = "{OUTDIR}/{sample}/STARsolo/Solo.out"
+        # VELDIR = directory("{OUTDIR}/{sample}/STARsolo/Solo.out/Velocyto"),
+        # SJDIR = directory("{OUTDIR}/{sample}/STARsolo/Solo.out/SJ"),
+        # GENEDIR = directory("{OUTDIR}/{sample}/STARsolo/Solo.out/Gene"),
+        # GENEFULLDIR = directory("{OUTDIR}/{sample}/STARsolo/Solo.out/GeneFull")
     threads:
         config['CORES']        
     run:
         shell(
             f"""
-            pigz -p{threads} {OUTDIR}/{wildcards.sample}/STARsolo/Solo.out/*/*/*.tsv {OUTDIR}/{wildcards.sample}/STARsolo/Solo.out/*/*/*.mtx
+            pigz -p{threads} {params.SOLODIR}/*/*/*.tsv {params.SOLODIR}/*/*/*.mtx
             """
         )
-# {params.VELDIR}/*/*.tsv {params.VELDIR}/*/*.mtx \
-#              {params.GENEDIR}/*/*.tsv {params.GENEDIR}/*/*.mtx \
-#              {params.GENEFULLDIR}/*/*.tsv {params.GENEFULLDIR}/*/*.mtx \
-#              {params.SJDIR}/*/*.tsv {params.SJDIR}/*/*.mtx
 
+# Index the .bam from STARsolo
 rule indexSortedBAM:
     input:
         SORTEDBAM = '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.out.bam'
@@ -105,6 +103,6 @@ rule indexSortedBAM:
     run:
         shell(
             f"""
-            samtools index -@ {threads} {input.SORTEDBAM}
+            {SAMTOOLS_EXEC} index -@ {threads} {input.SORTEDBAM}
             """
         )

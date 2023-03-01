@@ -46,6 +46,7 @@ SAMTOOLS_EXEC = config["SAMTOOLS_EXEC"]
 UMITOOLS_EXEC = config["UMITOOLS_EXEC"]
 QUALIMAP_EXEC = config["QUALIMAP_EXEC"]
 # MULTIQC_EXEC = config["MULTIQC_EXEC"]
+# MIRGE_EXEC = config['MIRGE_EXEC']
 BAM2SPLITBW = config["BAM2SPLITBW"]
 FASTX_COLLAPSER = config["FASTX_COLLAPSER"]
 BLASTDB = config["BLASTDB"]
@@ -55,11 +56,12 @@ BLASTDB = config["BLASTDB"]
 ########################################################################################################
 # Build dictionaries of chemistries & species to use for alignment
 CHEM_DICT = {} # Dictionary of chemistry recipe to use for each sample
-rRNA_DICT = {}
+rRNA_DICT = {} # Dictionary of rRNA reference genomes to use 
 REF_DICT = {} # Dictionary of reference genomes to use
 GTF_DICT = {} # Dictionary of gene annotations (.gtf format)
 IDX_DICT = {} # Dictionary of kallisto indices
 T2G_DICT = {} # Dictionary of kallisto transcript-to-gene maps
+# SPECIES_DICT = {} # SPecies listed for mirge3 analysis
 for i in range(0,SAMPLE_SHEET.shape[0]):
     tmp_id = list(SAMPLE_SHEET["sampleID"])[i]
     CHEM_DICT[tmp_id] = list(SAMPLE_SHEET["chemistry"])[i]
@@ -68,11 +70,13 @@ for i in range(0,SAMPLE_SHEET.shape[0]):
     GTF_DICT[tmp_id] = list(SAMPLE_SHEET["genes_gtf"])[i]
     IDX_DICT[tmp_id] = list(SAMPLE_SHEET["kb_idx"])[i]
     T2G_DICT[tmp_id] = list(SAMPLE_SHEET["kb_t2g"])[i]
+    # SPECIES_DICT[tmp_id] = list(SAMPLE_SHEET["species"])[i]
 
 ########################################################################################################
 rule all:
     input:
         # expand('{OUTDIR}/{sample}/STARsolo/Solo.out/Gene/raw_feature_bc_matrix_h5.h5', OUTDIR=config['OUTDIR'], sample=SAMPLES),
+        # expand('{OUTDIR}/{sample}/kb_wrapper/counts_unfiltered/adata.h5ad', OUTDIR=config['OUTDIR'], sample=SAMPLES),
         expand( # umi_tools deduplicated .bam/.bai
             '{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out.bam.bai', 
             OUTDIR=config['OUTDIR'], 
@@ -80,7 +84,6 @@ rule all:
         ), 
         # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_plus.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES), # strand-split bigWigs
         # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_merged.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES), 
-        # expand('{OUTDIR}/{sample}/kb_wrapper/counts_unfiltered/adata.h5ad', OUTDIR=config['OUTDIR'], sample=SAMPLES),
         expand( # gzipped kallisto/bustool count matrices
             '{OUTDIR}/{sample}/kb/counts_unfiltered/{FILE}.gz', 
             OUTDIR=config['OUTDIR'],
