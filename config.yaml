@@ -5,10 +5,10 @@
 ########################################################################################################
 
 # Sample sheet requires a sampleID, and locations of fastqs for R1 and R2
-SAMPLE_SHEET_PATH: /home/dwm269/sample_sheets/visium/STRS6.csv
+SAMPLE_SHEET_PATH: /home/dwm269/private_utils/sample_sheets/visium/STRS6.csv
 
 #TODO- stratify core usage for hi/lo requirements?
-CORES: 12 # how many cores to give for each process (snakemake automatically parallelizes process using "snakemake -j {numTotalCores}")
+CORES: 15 # how many cores to give for each process (snakemake automatically parallelizes process using "snakemake -j {numTotalCores}")
 MEMLIMIT: 500000000000 # limit in bytes
 
 ## Chemistry details (whitelists, barcode/UMI design, etc.)
@@ -18,8 +18,8 @@ FASTQC_ADAPTERS: resources/fastqc_adapters.txt
 ########################################################################################################
 # Important directory file paths
 ########################################################################################################
-TMPDIR: /workdir/dwm269/totalRNA/tmp # directory for temporary files
-OUTDIR: /workdir/dwm269/totalRNA/data/align_out/STRS_rRNA 
+TMPDIR: /workdir/dwm269/tmp # directory for temporary files
+OUTDIR: /workdir/dwm269/cohen_testes/data/STRS
 
 ########################################################################################################
 # Executables - file paths
@@ -33,7 +33,12 @@ FASTQC_EXEC: fastqc
 SAMTOOLS_EXEC: /programs/samtools-1.15.1-r/bin/samtools
 UMITOOLS_EXEC: umi_tools
 QUALIMAP_EXEC: qualimap
+MIRGE_EXEC: miRge3.0
 BAM2SPLITBW: /home/dwm269/DWM_utils/seq_utils/bam2splitBigWig.sh #Custom function in DWM_utils that splits a bam file by strand and converts it into bigwig format
 FASTX_COLLAPSER: fastx_collapser
 BLASTDB: /shared_data/genome_db/BLAST_NCBI # path to where the nt BLAST database is stored
 
+########################################################################################################
+# Additional resources - file paths
+########################################################################################################
+MIRGE_LIB: /home/dwm269/usr/bin/miRge3_Lib

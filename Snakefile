@@ -46,7 +46,7 @@ SAMTOOLS_EXEC = config["SAMTOOLS_EXEC"]
 UMITOOLS_EXEC = config["UMITOOLS_EXEC"]
 QUALIMAP_EXEC = config["QUALIMAP_EXEC"]
 # MULTIQC_EXEC = config["MULTIQC_EXEC"]
-# MIRGE_EXEC = config['MIRGE_EXEC']
+MIRGE_EXEC = config['MIRGE_EXEC']
 BAM2SPLITBW = config["BAM2SPLITBW"]
 FASTX_COLLAPSER = config["FASTX_COLLAPSER"]
 BLASTDB = config["BLASTDB"]
@@ -61,7 +61,7 @@ REF_DICT = {} # Dictionary of reference genomes to use
 GTF_DICT = {} # Dictionary of gene annotations (.gtf format)
 IDX_DICT = {} # Dictionary of kallisto indices
 T2G_DICT = {} # Dictionary of kallisto transcript-to-gene maps
-# SPECIES_DICT = {} # SPecies listed for mirge3 analysis
+SPECIES_DICT = {} # Species listed for mirge3 analysis
 for i in range(0,SAMPLE_SHEET.shape[0]):
     tmp_id = list(SAMPLE_SHEET["sampleID"])[i]
     CHEM_DICT[tmp_id] = list(SAMPLE_SHEET["chemistry"])[i]
@@ -70,7 +70,7 @@ for i in range(0,SAMPLE_SHEET.shape[0]):
     GTF_DICT[tmp_id] = list(SAMPLE_SHEET["genes_gtf"])[i]
     IDX_DICT[tmp_id] = list(SAMPLE_SHEET["kb_idx"])[i]
     T2G_DICT[tmp_id] = list(SAMPLE_SHEET["kb_t2g"])[i]
-    # SPECIES_DICT[tmp_id] = list(SAMPLE_SHEET["species"])[i]
+    SPECIES_DICT[tmp_id] = list(SAMPLE_SHEET["species"])[i]
 
 ########################################################################################################
 rule all:
@@ -83,7 +83,12 @@ rule all:
             sample=SAMPLES
         ), 
         # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_plus.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES), # strand-split bigWigs
-        # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_merged.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES), 
+        # expand('{OUTDIR}/{sample}/STARsolo/Aligned.sortedByCoord.dedup.out_merged.bw', OUTDIR=config['OUTDIR'], sample=SAMPLES),         
+        expand( # miRge3.0 pseudobulk analysis
+            '{OUTDIR}/{sample}/miRge_bulk/annotation.report.html', 
+            OUTDIR=config['OUTDIR'],
+            sample=SAMPLES
+        ),
         expand( # gzipped kallisto/bustool count matrices
             '{OUTDIR}/{sample}/kb/counts_unfiltered/{FILE}.gz', 
             OUTDIR=config['OUTDIR'],
@@ -141,5 +146,8 @@ include: "rules/2e_qualimapQC.smk"
 # kallisto
 include: "rules/3_kallisto_align.smk"
 # include: "rules/3_kallisto_quant.smk"
+
+# small RNA analysis
+include: "rules/4_mirge.smk"
 
 include: "rules/bamToSplitBigWig.smk"
